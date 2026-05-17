@@ -1,0 +1,1524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0f172a">
+  <title>The Northman - Warrior Training</title>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&display=swap');
+    
+    body { 
+      margin: 0; 
+      padding: 0; 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0f172a;
+    }
+    
+    .viking-title {
+      font-family: 'Cinzel', serif;
+      letter-spacing: 2px;
+    }
+    
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    .viking-gradient {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 50%, #1e1b4b 100%);
+    }
+    
+    .rune-border {
+      border: 2px solid #64748b;
+      border-image: repeating-linear-gradient(
+        45deg,
+        #64748b,
+        #64748b 10px,
+        transparent 10px,
+        transparent 20px
+      ) 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // ============================================
+    // PROGRAM DATA
+    // ============================================
+    
+    const PROGRAM_START_DATE = new Date('2026-05-25'); // Monday, May 25th 2026
+    
+    const calculateCurrentWeek = () => {
+      const today = new Date();
+      const diffTime = today - PROGRAM_START_DATE;
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      const weekNumber = Math.floor(diffDays / 7) + 1;
+      
+      // If before start date, show Week 1
+      if (weekNumber < 1) return 1;
+      // Cap at Week 24
+      if (weekNumber > 24) return 24;
+      return weekNumber;
+    };
+    
+    const WORKOUTS = {
+      monday: {
+        name: "Upper Strength (Horizontal)",
+        focus: "Chest & Back Thickness",
+        emoji: "⚔️",
+        exercises: [
+          { name: "Smith Machine Bench Press", sets: 4, reps: "6-8", type: "compound" },
+          { name: "Cable Row (Lower Chest)", sets: 4, reps: "8-10", type: "compound" },
+          { name: "Incline Dumbbell Press", sets: 3, reps: "10-12", type: "accessory" },
+          { name: "Chest-Supported Row", sets: 3, reps: "10-12", type: "accessory" },
+          { name: "Face Pulls", sets: 3, reps: "15-20", type: "accessory" },
+          { name: "Dumbbell Pullover", sets: 3, reps: "12-15", type: "accessory" },
+        ]
+      },
+      tuesday: {
+        name: "Lower Strength",
+        focus: "Functional Leg Strength",
+        emoji: "🦵",
+        exercises: [
+          { name: "Smith Machine Squat", sets: 4, reps: "6-8", type: "compound" },
+          { name: "Dumbbell Romanian Deadlift", sets: 4, reps: "8-10", type: "compound" },
+          { name: "Bulgarian Split Squat", sets: 3, reps: "8-10/leg", type: "accessory" },
+          { name: "Single-Leg DB RDL", sets: 3, reps: "10/leg", type: "accessory" },
+          { name: "Weighted Plank", sets: 3, reps: "45-60s", type: "accessory" },
+          { name: "Farmer Carries", sets: 3, reps: "40m", type: "accessory" },
+        ]
+      },
+      wednesday: {
+        name: "Upper Hypertrophy (Vertical)",
+        focus: "SHOULDER WIDTH & Back V-Taper",
+        emoji: "💪",
+        exercises: [
+          { name: "Smith Machine Overhead Press", sets: 4, reps: "8-10", type: "compound" },
+          { name: "Pull-Ups / Lat Pulldown", sets: 4, reps: "8-12", type: "compound" },
+          { name: "Dumbbell Lateral Raises", sets: 4, reps: "12-15", type: "accessory" },
+          { name: "Cable Face Pulls", sets: 4, reps: "15-20", type: "accessory" },
+          { name: "Incline Dumbbell Press", sets: 3, reps: "10-12", type: "accessory" },
+          { name: "Cable Straight-Arm Pulldown", sets: 3, reps: "12-15", type: "accessory" },
+          { name: "Rear Delt Flyes", sets: 3, reps: "15", type: "accessory" },
+          { name: "Dumbbell Shrugs", sets: 3, reps: "15", type: "accessory" },
+        ]
+      },
+      thursday: {
+        name: "Lower Hypertrophy",
+        focus: "Athletic Leg Development",
+        emoji: "🏔️",
+        exercises: [
+          { name: "Dumbbell Step-Ups", sets: 4, reps: "10/leg", type: "compound" },
+          { name: "Bulgarian Split Squat", sets: 4, reps: "10-12/leg", type: "compound" },
+          { name: "Dumbbell RDL", sets: 3, reps: "12", type: "accessory" },
+          { name: "Single-Leg Glute Bridge", sets: 3, reps: "12/leg", type: "accessory" },
+          { name: "Weighted Walking Lunges", sets: 3, reps: "12/leg", type: "accessory" },
+          { name: "Hanging Knee Raises", sets: 3, reps: "12", type: "accessory" },
+        ]
+      },
+      friday: {
+        name: "Upper Pump (Shoulders & Arms)",
+        focus: "Shoulder Caps & Arm Definition",
+        emoji: "🔥",
+        exercises: [
+          { name: "Seated DB Overhead Press", sets: 3, reps: "10-12", type: "compound" },
+          { name: "Dumbbell Lateral Raises", sets: 3, reps: "12-15", type: "accessory" },
+          { name: "Dumbbell Front Raises", sets: 3, reps: "12", type: "accessory" },
+          { name: "Cable Upright Row", sets: 3, reps: "12-15", type: "accessory" },
+          { name: "Cable Bicep Curls", sets: 3, reps: "12-15", type: "accessory" },
+          { name: "Cable Tricep Pushdowns", sets: 3, reps: "12-15", type: "accessory" },
+          { name: "Hammer Curls", sets: 3, reps: "12", type: "accessory" },
+          { name: "Overhead DB Tricep Extension", sets: 3, reps: "12", type: "accessory" },
+          { name: "Cable Face Pulls", sets: 3, reps: "20", type: "accessory" },
+        ]
+      },
+      saturday: {
+        name: "Progressive Ruck/Hike",
+        focus: "Solo Camping Preparation",
+        emoji: "🥾",
+        exercises: [
+          { name: "Ruck/Hike", sets: 1, reps: "60-180min", type: "cardio", note: "10kg→20kg progression" },
+        ]
+      },
+      sunday: {
+        name: "Recovery Day",
+        focus: "Rest & Mobility",
+        emoji: "🛡️",
+        exercises: [
+          { name: "Easy Walk", sets: 1, reps: "20-30min", type: "recovery" },
+          { name: "Stretching & Mobility", sets: 1, reps: "30min", type: "recovery" },
+        ]
+      }
+    };
+
+    const MEAL_PLAN = {
+      meal1: {
+        name: "Pre-Workout",
+        time: "4:10am",
+        defaultCalories: 300,
+        items: [
+          { id: '1a', name: 'Banana', amount: '1 medium' },
+          { id: '1b', name: 'Boiled eggs', amount: '2 eggs' },
+          { id: '1c', name: 'Black coffee', amount: '1 cup' }
+        ]
+      },
+      meal2: {
+        name: "Post-Workout Breakfast",
+        time: "6:15am",
+        defaultCalories: 900,
+        items: [
+          { id: '2a', name: 'Whole eggs', amount: '3 eggs' },
+          { id: '2b', name: 'Egg whites', amount: '200ml' },
+          { id: '2c', name: 'Oats', amount: '100g' },
+          { id: '2d', name: 'Blueberries', amount: '50g' },
+          { id: '2e', name: 'Greek yogurt', amount: '200g' },
+          { id: '2f', name: 'Honey', amount: '1 tbsp' },
+          { id: '2g', name: 'Peanut butter', amount: '1 tbsp' }
+        ]
+      },
+      meal3: {
+        name: "Lunch",
+        time: "12:30pm",
+        defaultCalories: 950,
+        items: [
+          { id: '3a', name: 'Chicken breast', amount: '250g' },
+          { id: '3b', name: 'White rice', amount: '2 cups cooked' },
+          { id: '3c', name: 'Mixed salad', amount: '2 cups' },
+          { id: '3d', name: 'Avocado', amount: '1 whole' },
+          { id: '3e', name: 'Olive oil', amount: '1 tbsp' }
+        ]
+      },
+      meal4: {
+        name: "Afternoon Snack",
+        time: "3:30pm",
+        defaultCalories: 600,
+        items: [
+          { id: '4a', name: 'Greek yogurt', amount: '200g' },
+          { id: '4b', name: 'Oats', amount: '50g' },
+          { id: '4c', name: 'Honey', amount: '1 tbsp' },
+          { id: '4d', name: 'Banana or apple', amount: '1 piece' }
+        ]
+      },
+      meal5: {
+        name: "Dinner",
+        time: "6:00pm",
+        defaultCalories: 850,
+        items: [
+          { id: '5a', name: 'Salmon fillet', amount: '200g' },
+          { id: '5b', name: 'Sweet potato', amount: '300g' },
+          { id: '5c', name: 'Broccoli', amount: '200g' },
+          { id: '5d', name: 'Olive oil', amount: '1 tbsp' }
+        ]
+      }
+    };
+
+    // ============================================
+    // STORAGE (localStorage for GitHub Pages)
+    // ============================================
+    
+    const storage = {
+      get(key) {
+        try {
+          const data = localStorage.getItem(key);
+          return data ? JSON.parse(data) : null;
+        } catch (e) {
+          console.log('Storage get error:', e);
+          return null;
+        }
+      },
+      
+      set(key, value) {
+        try {
+          localStorage.setItem(key, JSON.stringify(value));
+          return true;
+        } catch (e) {
+          console.error('Storage set error:', e);
+          return false;
+        }
+      }
+    };
+
+    // ============================================
+    // MAIN APP
+    // ============================================
+    
+    function NorthmanApp() {
+      const [activeTab, setActiveTab] = useState('home');
+      const [currentWeek, setCurrentWeek] = useState(calculateCurrentWeek());
+      const [workoutHistory, setWorkoutHistory] = useState({});
+      const [measurements, setMeasurements] = useState([]);
+      const [photos, setPhotos] = useState([]);
+      const [mealChecks, setMealChecks] = useState({});
+      const [customizedMeals, setCustomizedMeals] = useState({});
+      const [currentDay, setCurrentDay] = useState('monday');
+      const [isLoading, setIsLoading] = useState(true);
+
+      useEffect(() => {
+        loadData();
+      }, []);
+
+      const loadData = () => {
+        try {
+          const week = storage.get('currentWeek');
+          const history = storage.get('workoutHistory');
+          const measures = storage.get('measurements');
+          const pics = storage.get('photos');
+          const meals = storage.get('mealChecks');
+          const customMeals = storage.get('customizedMeals');
+          
+          // Use stored week if available, otherwise calculate based on start date
+          if (week && typeof week === 'number') {
+            setCurrentWeek(week);
+          } else {
+            setCurrentWeek(calculateCurrentWeek());
+          }
+          
+          if (history && typeof history === 'object') setWorkoutHistory(history);
+          if (Array.isArray(measures)) setMeasurements(measures);
+          if (Array.isArray(pics)) setPhotos(pics);
+          if (meals && typeof meals === 'object') setMealChecks(meals);
+          if (customMeals && typeof customMeals === 'object') setCustomizedMeals(customMeals);
+        } catch (error) {
+          console.log('Error loading data:', error);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      const saveData = (key, value, setter) => {
+        setter(value);
+        storage.set(key, value);
+      };
+
+      const getCurrentPhase = () => {
+        if (currentWeek <= 8) return "Foundation";
+        if (currentWeek <= 16) return "Hypertrophy";
+        return "Refinement";
+      };
+
+      if (isLoading) {
+        return (
+          <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+            <div className="text-center">
+              <div className="text-6xl mb-4">⚔️</div>
+              <div className="viking-title text-2xl text-amber-400 font-bold">Loading...</div>
+            </div>
+          </div>
+        );
+      }
+
+      // ============================================
+      // HOME TAB
+      // ============================================
+      
+      const HomeTab = () => {
+        const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+        const todayWorkout = WORKOUTS[today];
+        const progress = Math.round((currentWeek / 24) * 100);
+        
+        const daysUntilStart = Math.ceil((PROGRAM_START_DATE - new Date()) / (1000 * 60 * 60 * 24));
+        const daysSinceStart = Math.floor((new Date() - PROGRAM_START_DATE) / (1000 * 60 * 60 * 24));
+        const isBeforeStart = daysUntilStart > 0;
+
+        return (
+          <div className="p-4 space-y-4 pb-20">
+            {/* Viking Header */}
+            <div className="viking-gradient rounded-lg p-6 text-center relative overflow-hidden">
+              <div className="absolute inset-0 opacity-10">
+                <div className="text-6xl">⚔️🛡️⚡</div>
+              </div>
+              <h1 className="viking-title text-4xl font-black text-amber-400 mb-2 relative z-10">
+                THE NORTHMAN
+              </h1>
+              <p className="text-slate-300 text-sm mb-4 relative z-10">Warrior Physique Protocol</p>
+              
+              <div className="bg-slate-800/50 rounded-lg p-4 relative z-10">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-slate-400 text-xs">WEEK {currentWeek}/24</span>
+                  <span className="text-amber-400 text-xs font-bold">{getCurrentPhase()}</span>
+                </div>
+                <div className="w-full bg-slate-700 rounded-full h-2">
+                  <div 
+                    className="bg-gradient-to-r from-amber-600 to-amber-400 h-2 rounded-full transition-all"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+                <div className="flex justify-between items-center mt-2">
+                  <p className="text-slate-400 text-xs">{progress}% Complete</p>
+                  {isBeforeStart ? (
+                    <p className="text-amber-400 text-xs font-bold">
+                      Starts in {daysUntilStart} days 🗓️
+                    </p>
+                  ) : (
+                    <p className="text-amber-400 text-xs">
+                      Day {daysSinceStart + 1} of journey
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Today's Battle */}
+            {todayWorkout && (
+              <div className="bg-slate-800 rounded-lg p-4 border-2 border-amber-600/30">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-3xl">{todayWorkout.emoji}</span>
+                  <div>
+                    <div className="text-xs text-amber-400 font-bold">TODAY'S BATTLE</div>
+                    <h3 className="text-white font-bold">{todayWorkout.name}</h3>
+                  </div>
+                </div>
+                <p className="text-slate-400 text-sm mb-3">{todayWorkout.focus}</p>
+                <button
+                  onClick={() => {
+                    setCurrentDay(today);
+                    setActiveTab('workouts');
+                  }}
+                  className="w-full bg-gradient-to-r from-amber-600 to-amber-500 text-white py-3 rounded-lg font-bold hover:from-amber-700 hover:to-amber-600"
+                >
+                  BEGIN TRAINING ⚔️
+                </button>
+              </div>
+            )}
+
+            {/* Quick Stats */}
+            <div className="grid grid-cols-3 gap-3">
+              <div className="bg-slate-800 rounded-lg p-3 text-center border border-slate-700">
+                <div className="text-2xl font-bold text-amber-400">
+                  {workoutHistory ? Object.keys(workoutHistory).length : 0}
+                </div>
+                <div className="text-xs text-slate-400">Battles Won</div>
+              </div>
+              <div className="bg-slate-800 rounded-lg p-3 text-center border border-slate-700">
+                <div className="text-2xl font-bold text-amber-400">
+                  {measurements ? measurements.length : 0}
+                </div>
+                <div className="text-xs text-slate-400">Measurements</div>
+              </div>
+              <div className="bg-slate-800 rounded-lg p-3 text-center border border-slate-700">
+                <div className="text-2xl font-bold text-amber-400">
+                  {photos ? photos.length : 0}
+                </div>
+                <div className="text-xs text-slate-400">Progress Pics</div>
+              </div>
+            </div>
+
+            {/* Today's Fuel */}
+            <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
+              <h3 className="text-amber-400 font-bold mb-2 flex items-center gap-2">
+                <span>🍖</span> TODAY'S FUEL
+              </h3>
+              <div className="space-y-2">
+                {Object.entries(MEAL_PLAN).map(([key, meal]) => {
+                  const today = new Date().toISOString().split('T')[0];
+                  const checked = mealChecks[today]?.[key];
+                  return (
+                    <div key={key} className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={checked || false}
+                        onChange={(e) => {
+                          const newChecks = {
+                            ...mealChecks,
+                            [today]: {
+                              ...mealChecks[today],
+                              [key]: e.target.checked
+                            }
+                          };
+                          saveData('mealChecks', newChecks, setMealChecks);
+                        }}
+                        className="w-4 h-4"
+                      />
+                      <span className={`flex-1 ${checked ? 'line-through text-slate-500' : 'text-slate-300'}`}>
+                        {meal.name} ({meal.time})
+                      </span>
+                      <span className="text-amber-400 text-xs">{meal.calories}cal</span>
+                    </div>
+                  );
+                })}
+              </div>
+              <button
+                onClick={() => setActiveTab('meals')}
+                className="w-full mt-3 bg-slate-700 text-slate-300 py-2 rounded text-sm hover:bg-slate-600"
+              >
+                View Full Meal Plan →
+              </button>
+            </div>
+
+            {/* Latest Progress */}
+            {measurements && measurements.length > 0 && (
+              <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
+                <h3 className="text-amber-400 font-bold mb-3">LATEST MEASUREMENTS</h3>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="text-center">
+                    <div className="text-xs text-slate-400">Weight</div>
+                    <div className="text-lg font-bold text-white">
+                      {measurements[measurements.length - 1].weight}kg
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xs text-slate-400">Waist</div>
+                    <div className="text-lg font-bold text-white">
+                      {measurements[measurements.length - 1].waist}cm
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xs text-slate-400">Shoulders</div>
+                    <div className="text-lg font-bold text-white">
+                      {measurements[measurements.length - 1].shoulders}cm
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      };
+
+      // ============================================
+      // WORKOUTS TAB
+      // ============================================
+      
+      const WorkoutsTab = () => {
+        const [viewMode, setViewMode] = useState('list'); // 'list' or 'workout'
+        const [exerciseData, setExerciseData] = useState({});
+        const [completedExercises, setCompletedExercises] = useState([]);
+
+        const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+
+        useEffect(() => {
+          if (viewMode === 'workout' && currentDay && workoutHistory) {
+            const today = new Date().toISOString().split('T')[0];
+            const key = `${today}-${currentDay}`;
+            if (workoutHistory[key]) {
+              setExerciseData(workoutHistory[key].exercises || {});
+              setCompletedExercises(workoutHistory[key].completed || []);
+            } else {
+              setExerciseData({});
+              setCompletedExercises([]);
+            }
+          }
+        }, [viewMode, currentDay]);
+
+        const handleSetInput = (exerciseIndex, setIndex, field, value) => {
+          setExerciseData(prev => ({
+            ...prev,
+            [exerciseIndex]: {
+              ...(prev[exerciseIndex] || {}),
+              [setIndex]: {
+                ...(prev[exerciseIndex]?.[setIndex] || {}),
+                [field]: value
+              }
+            }
+          }));
+        };
+
+        const toggleExerciseComplete = (exerciseIndex) => {
+          setCompletedExercises(prev => 
+            prev.includes(exerciseIndex)
+              ? prev.filter(i => i !== exerciseIndex)
+              : [...prev, exerciseIndex]
+          );
+        };
+
+        const saveWorkout = async () => {
+          const today = new Date().toISOString().split('T')[0];
+          const key = `${today}-${currentDay}`;
+          const workout = WORKOUTS[currentDay];
+          
+          const newHistory = {
+            ...workoutHistory,
+            [key]: {
+              date: today,
+              day: currentDay,
+              workout: workout.name,
+              exercises: exerciseData,
+              completed: completedExercises,
+              week: currentWeek
+            }
+          };
+          
+          await saveData('workoutHistory', newHistory, setWorkoutHistory);
+          alert('⚔️ Battle recorded! Well fought, warrior!');
+          setViewMode('list');
+        };
+
+        if (viewMode === 'workout') {
+          const workout = WORKOUTS[currentDay];
+          
+          return (
+            <div className="p-4 space-y-4 pb-24">
+              <div className="bg-slate-800 rounded-lg p-4 sticky top-0 z-10">
+                <button 
+                  onClick={() => setViewMode('list')} 
+                  className="text-amber-400 mb-2"
+                >
+                  ← Back to Weekly Plan
+                </button>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-3xl">{workout.emoji}</span>
+                  <div>
+                    <h2 className="text-xl font-bold text-white">{workout.name}</h2>
+                    <p className="text-sm text-slate-400">{workout.focus}</p>
+                  </div>
+                </div>
+                <div className="text-xs text-amber-400">
+                  Week {currentWeek} • {getCurrentPhase()}
+                </div>
+              </div>
+
+              {workout.exercises.map((exercise, exerciseIndex) => {
+                const isCompleted = completedExercises.includes(exerciseIndex);
+                const setsArray = Array.from({ length: exercise.sets }, (_, i) => i);
+
+                return (
+                  <div 
+                    key={exerciseIndex}
+                    className={`bg-slate-800 rounded-lg p-4 border border-slate-700 ${isCompleted ? 'opacity-60' : ''}`}
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => toggleExerciseComplete(exerciseIndex)}
+                            className={`w-6 h-6 rounded border-2 flex items-center justify-center ${
+                              isCompleted 
+                                ? 'bg-amber-600 border-amber-600 text-white' 
+                                : 'border-slate-600'
+                            }`}
+                          >
+                            {isCompleted && '✓'}
+                          </button>
+                          <h3 className={`font-bold text-white ${isCompleted ? 'line-through' : ''}`}>
+                            {exercise.name}
+                          </h3>
+                        </div>
+                        <p className="text-sm text-slate-400 mt-1 ml-8">
+                          {exercise.sets} sets × {exercise.reps}
+                        </p>
+                        {exercise.note && (
+                          <p className="text-xs text-amber-400 mt-1 ml-8">{exercise.note}</p>
+                        )}
+                      </div>
+                      <span className={`text-xs px-2 py-1 rounded ${
+                        exercise.type === 'compound' 
+                          ? 'bg-red-900/50 text-red-300'
+                          : exercise.type === 'accessory'
+                          ? 'bg-blue-900/50 text-blue-300'
+                          : 'bg-green-900/50 text-green-300'
+                      }`}>
+                        {exercise.type}
+                      </span>
+                    </div>
+
+                    {exercise.type !== 'recovery' && exercise.type !== 'cardio' && (
+                      <div className="space-y-2">
+                        {setsArray.map(setIndex => (
+                          <div key={setIndex} className="flex items-center gap-2">
+                            <span className="text-sm font-semibold text-slate-400 w-12">
+                              Set {setIndex + 1}
+                            </span>
+                            <input
+                              type="number"
+                              placeholder="kg"
+                              value={exerciseData[exerciseIndex]?.[setIndex]?.weight || ''}
+                              onChange={(e) => handleSetInput(exerciseIndex, setIndex, 'weight', e.target.value)}
+                              className="flex-1 bg-slate-900 border border-slate-600 rounded px-3 py-2 text-center text-white"
+                            />
+                            <span className="text-slate-500">×</span>
+                            <input
+                              type="number"
+                              placeholder="reps"
+                              value={exerciseData[exerciseIndex]?.[setIndex]?.reps || ''}
+                              onChange={(e) => handleSetInput(exerciseIndex, setIndex, 'reps', e.target.value)}
+                              className="flex-1 bg-slate-900 border border-slate-600 rounded px-3 py-2 text-center text-white"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {(exercise.type === 'cardio' || exercise.type === 'recovery') && (
+                      <textarea
+                        placeholder="Notes (duration, distance, etc.)"
+                        value={exerciseData[exerciseIndex]?.[0]?.notes || ''}
+                        onChange={(e) => handleSetInput(exerciseIndex, 0, 'notes', e.target.value)}
+                        className="w-full bg-slate-900 border border-slate-600 rounded px-3 py-2 text-sm text-white"
+                        rows="2"
+                      />
+                    )}
+                  </div>
+                );
+              })}
+
+              <div className="fixed bottom-16 left-0 right-0 p-4 bg-slate-900/95 border-t border-slate-700">
+                <button
+                  onClick={saveWorkout}
+                  className="w-full bg-gradient-to-r from-amber-600 to-amber-500 text-white py-4 rounded-lg font-bold text-lg"
+                >
+                  ⚔️ RECORD BATTLE
+                </button>
+              </div>
+            </div>
+          );
+        }
+
+        return (
+          <div className="p-4 space-y-4 pb-20">
+            <div className="bg-slate-800 rounded-lg p-4 text-center">
+              <h2 className="viking-title text-2xl font-bold text-amber-400 mb-1">
+                WEEKLY TRAINING
+              </h2>
+              <p className="text-slate-400 text-sm">Choose Your Battle</p>
+            </div>
+
+            {days.map(day => {
+              const workout = WORKOUTS[day];
+              return (
+                <div key={day} className="bg-slate-800 rounded-lg p-4 border border-slate-700">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl">{workout.emoji}</span>
+                      <div>
+                        <div className="text-xs text-amber-400 uppercase font-bold">{day}</div>
+                        <h3 className="font-bold text-white">{workout.name}</h3>
+                        <p className="text-sm text-slate-400">{workout.focus}</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setCurrentDay(day);
+                        setViewMode('workout');
+                      }}
+                      className="bg-amber-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-amber-700"
+                    >
+                      START
+                    </button>
+                  </div>
+
+                  <div className="mt-3 pt-3 border-t border-slate-700 space-y-1">
+                    {workout.exercises.map((exercise, idx) => (
+                      <div key={idx} className="flex items-start justify-between text-sm">
+                        <span className="text-slate-300">{exercise.name}</span>
+                        <span className="text-xs text-slate-500 ml-2">
+                          {exercise.sets}×{exercise.reps}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        );
+      };
+
+      // ============================================
+      // PROGRESS TAB
+      // ============================================
+      
+      const ProgressTab = () => {
+        const [showMeasureForm, setShowMeasureForm] = useState(false);
+        const [newMeasure, setNewMeasure] = useState({
+          date: new Date().toISOString().split('T')[0],
+          weight: '', waist: '', shoulders: '', chest: '', arms: '', thighs: ''
+        });
+
+        const handleAddMeasure = async () => {
+          await saveData('measurements', [...measurements, newMeasure], setMeasurements);
+          setShowMeasureForm(false);
+          setNewMeasure({
+            date: new Date().toISOString().split('T')[0],
+            weight: '', waist: '', shoulders: '', chest: '', arms: '', thighs: ''
+          });
+        };
+
+        const handlePhotoUpload = async (e) => {
+          const file = e.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+              const newPhoto = {
+                date: new Date().toISOString().split('T')[0],
+                week: currentWeek,
+                data: event.target.result
+              };
+              await saveData('photos', [...photos, newPhoto], setPhotos);
+            };
+            reader.readAsDataURL(file);
+          }
+        };
+
+        return (
+          <div className="p-4 space-y-4 pb-20">
+            <div className="bg-slate-800 rounded-lg p-4 text-center">
+              <h2 className="viking-title text-2xl font-bold text-amber-400 mb-1">
+                WARRIOR PROGRESS
+              </h2>
+              <p className="text-slate-400 text-sm">Track Your Transformation</p>
+            </div>
+
+            {/* Photo Upload */}
+            <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
+              <h3 className="text-amber-400 font-bold mb-3 flex items-center gap-2">
+                <span>📸</span> PROGRESS PHOTOS
+              </h3>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoUpload}
+                className="hidden"
+                id="photo-upload"
+              />
+              <label
+                htmlFor="photo-upload"
+                className="block w-full bg-amber-600 text-white py-3 rounded-lg font-bold text-center cursor-pointer hover:bg-amber-700"
+              >
+                + Add Photo (Week {currentWeek})
+              </label>
+
+              {photos && photos.length > 0 && (
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                  {[...photos].reverse().slice(0, 4).map((photo, idx) => (
+                    <div key={idx} className="relative">
+                      <img 
+                        src={photo.data} 
+                        alt={`Week ${photo.week}`}
+                        className="w-full h-32 object-cover rounded-lg"
+                      />
+                      <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white text-xs p-1 text-center rounded-b-lg">
+                        Week {photo.week}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Measurements */}
+            <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-amber-400 font-bold flex items-center gap-2">
+                  <span>📏</span> MEASUREMENTS
+                </h3>
+                <button
+                  onClick={() => setShowMeasureForm(!showMeasureForm)}
+                  className="bg-amber-600 text-white px-3 py-1 rounded text-sm"
+                >
+                  + Add
+                </button>
+              </div>
+
+              {showMeasureForm && (
+                <div className="mb-4 space-y-2 p-3 bg-slate-900 rounded-lg">
+                  <input
+                    type="date"
+                    value={newMeasure.date}
+                    onChange={(e) => setNewMeasure({...newMeasure, date: e.target.value})}
+                    className="w-full bg-slate-800 border border-slate-600 rounded px-3 py-2 text-white"
+                  />
+                  <div className="grid grid-cols-2 gap-2">
+                    {['weight', 'waist', 'shoulders', 'chest', 'arms', 'thighs'].map(field => (
+                      <input
+                        key={field}
+                        type="number"
+                        step="0.1"
+                        placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+                        value={newMeasure[field]}
+                        onChange={(e) => setNewMeasure({...newMeasure, [field]: e.target.value})}
+                        className="bg-slate-800 border border-slate-600 rounded px-3 py-2 text-white"
+                      />
+                    ))}
+                  </div>
+                  <button
+                    onClick={handleAddMeasure}
+                    className="w-full bg-green-600 text-white py-2 rounded font-semibold"
+                  >
+                    Save
+                  </button>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                {!measurements || measurements.length === 0 ? (
+                  <p className="text-slate-500 text-center py-4">No measurements yet</p>
+                ) : (
+                  [...measurements].reverse().map((m, idx) => (
+                    <div key={idx} className="bg-slate-900 rounded-lg p-3">
+                      <div className="text-xs text-slate-400 mb-2">
+                        {new Date(m.date).toLocaleDateString()}
+                      </div>
+                      <div className="grid grid-cols-3 gap-2 text-sm">
+                        <div><span className="text-slate-500">Weight:</span> <span className="text-white font-bold">{m.weight}kg</span></div>
+                        <div><span className="text-slate-500">Waist:</span> <span className="text-white font-bold">{m.waist}cm</span></div>
+                        <div><span className="text-slate-500">Shoulders:</span> <span className="text-white font-bold">{m.shoulders}cm</span></div>
+                        {m.chest && <div><span className="text-slate-500">Chest:</span> <span className="text-white font-bold">{m.chest}cm</span></div>}
+                        {m.arms && <div><span className="text-slate-500">Arms:</span> <span className="text-white font-bold">{m.arms}cm</span></div>}
+                        {m.thighs && <div><span className="text-slate-500">Thighs:</span> <span className="text-white font-bold">{m.thighs}cm</span></div>}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* Settings */}
+            <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
+              <h3 className="text-amber-400 font-bold mb-3">⚙️ SETTINGS</h3>
+              <div className="mb-3 p-2 bg-slate-900 rounded text-sm">
+                <div className="text-slate-400 text-xs mb-1">Program Start Date</div>
+                <div className="text-white font-bold">
+                  {PROGRAM_START_DATE.toLocaleDateString('en-US', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                  })}
+                </div>
+              </div>
+              <div className="flex gap-2 mb-2">
+                <input
+                  type="number"
+                  min="1"
+                  max="24"
+                  value={currentWeek}
+                  onChange={(e) => saveData('currentWeek', parseInt(e.target.value), setCurrentWeek)}
+                  className="flex-1 bg-slate-900 border border-slate-600 rounded px-3 py-2 text-white"
+                />
+                <button 
+                  onClick={() => {
+                    const calculated = calculateCurrentWeek();
+                    saveData('currentWeek', calculated, setCurrentWeek);
+                    alert('Week updated to auto-calculated value!');
+                  }}
+                  className="bg-amber-600 text-white px-4 py-2 rounded font-semibold"
+                >
+                  Auto
+                </button>
+              </div>
+              <div className="text-xs text-slate-400">
+                Week {currentWeek}/24 • {getCurrentPhase()} Phase
+              </div>
+            </div>
+          </div>
+        );
+      };
+
+      // ============================================
+      // MEALS TAB (MyFitnessPal Style)
+      // ============================================
+      
+      const MealsTab = () => {
+        const today = new Date().toISOString().split('T')[0];
+        const todayChecks = (mealChecks && mealChecks[today]) || {};
+        
+        const [editingItem, setEditingItem] = useState(null);
+        const [searchQuery, setSearchQuery] = useState('');
+        const [searchAmount, setSearchAmount] = useState('');
+        const [searchResults, setSearchResults] = useState(null);
+        const [isSearching, setIsSearching] = useState(false);
+
+        // Calculate meal totals
+        const calculateMealTotals = (mealKey) => {
+          const meal = MEAL_PLAN[mealKey];
+          const customized = customizedMeals[mealKey] || {};
+          
+          let totalCals = 0;
+          let totalProtein = 0;
+          let totalCarbs = 0;
+          let totalFats = 0;
+          let hasAnyCustomized = false;
+
+          meal.items.forEach(item => {
+            if (customized[item.id]) {
+              hasAnyCustomized = true;
+              totalCals += customized[item.id].calories || 0;
+              totalProtein += customized[item.id].protein || 0;
+              totalCarbs += customized[item.id].carbs || 0;
+              totalFats += customized[item.id].fats || 0;
+            }
+          });
+
+          if (!hasAnyCustomized) {
+            return { 
+              calories: meal.defaultCalories, 
+              protein: '?', 
+              carbs: '?', 
+              fats: '?',
+              isEstimate: true 
+            };
+          }
+
+          return { 
+            calories: Math.round(totalCals), 
+            protein: Math.round(totalProtein), 
+            carbs: Math.round(totalCarbs), 
+            fats: Math.round(totalFats),
+            isEstimate: false
+          };
+        };
+
+        // Calculate daily totals
+        const calculateDailyTotals = () => {
+          let total = { calories: 0, protein: 0, carbs: 0, fats: 0 };
+
+          Object.keys(MEAL_PLAN).forEach(mealKey => {
+            if (todayChecks[mealKey]) {
+              const mealTotals = calculateMealTotals(mealKey);
+              total.calories += mealTotals.calories || 0;
+              if (typeof mealTotals.protein === 'number') total.protein += mealTotals.protein;
+              if (typeof mealTotals.carbs === 'number') total.carbs += mealTotals.carbs;
+              if (typeof mealTotals.fats === 'number') total.fats += mealTotals.fats;
+            }
+          });
+
+          return total;
+        };
+
+        // Search nutrition - robust version
+        const searchNutrition = async () => {
+          if (!searchQuery.trim()) {
+            alert('Please enter a food item');
+            return;
+          }
+
+          setIsSearching(true);
+          setSearchResults(null);
+
+          try {
+            const searchPhrase = `${searchQuery} ${searchAmount || ''} nutrition facts calories protein carbs fat`.trim();
+            
+            const response = await fetch("https://api.anthropic.com/v1/messages", {
+              method: "POST",
+              headers: { 
+                "Content-Type": "application/json",
+                "anthropic-version": "2023-06-01"
+              },
+              body: JSON.stringify({
+                model: "claude-sonnet-4-20250514",
+                max_tokens: 2000,
+                tools: [{ 
+                  type: "web_search_20250305", 
+                  name: "web_search" 
+                }],
+                messages: [{
+                  role: "user",
+                  content: `Search the web for: "${searchPhrase}"
+                  
+Find the nutrition information and extract:
+- Food name
+- Brand (if mentioned)
+- Serving size
+- Calories (kcal)
+- Protein (grams)
+- Carbohydrates (grams)
+- Fat (grams)
+
+Then respond with just the data in this format:
+FOOD: [name]
+BRAND: [brand or "unknown"]
+SERVING: [serving size]
+CALORIES: [number]
+PROTEIN: [number]
+CARBS: [number]
+FATS: [number]`
+                }]
+              })
+            });
+
+            if (!response.ok) {
+              const errorText = await response.text();
+              console.error('API error:', response.status, errorText);
+              throw new Error(`API returned ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log('Full API response:', JSON.stringify(data, null, 2));
+            
+            // Extract text from all content blocks
+            let fullText = '';
+            if (data.content && Array.isArray(data.content)) {
+              for (const block of data.content) {
+                if (block.type === 'text' && block.text) {
+                  fullText += block.text + '\n';
+                }
+              }
+            }
+            
+            console.log('Extracted text:', fullText);
+            
+            if (!fullText.trim()) {
+              throw new Error('No text content in API response');
+            }
+
+            // Parse the formatted response
+            const extractValue = (text, label) => {
+              const regex = new RegExp(`${label}:\\s*(.+?)(?:\n|$)`, 'i');
+              const match = text.match(regex);
+              return match ? match[1].trim() : '';
+            };
+
+            const extractNumber = (text, label) => {
+              const value = extractValue(text, label);
+              const number = value.replace(/[^0-9.]/g, '');
+              return parseFloat(number) || 0;
+            };
+
+            const nutritionData = {
+              food: extractValue(fullText, 'FOOD') || searchQuery,
+              brand: extractValue(fullText, 'BRAND').replace(/unknown/i, ''),
+              serving: extractValue(fullText, 'SERVING') || searchAmount || 'serving',
+              calories: Math.round(extractNumber(fullText, 'CALORIES')),
+              protein: Math.round(extractNumber(fullText, 'PROTEIN')),
+              carbs: Math.round(extractNumber(fullText, 'CARBS')),
+              fats: Math.round(extractNumber(fullText, 'FATS'))
+            };
+
+            console.log('Parsed nutrition data:', nutritionData);
+
+            // Validate we got at least calories
+            if (nutritionData.calories === 0 && nutritionData.protein === 0) {
+              throw new Error('Could not find nutrition data. Try:\n- Adding brand name\n- Being more specific\n- Different search terms');
+            }
+
+            setSearchResults(nutritionData);
+
+          } catch (error) {
+            console.error('Search error:', error);
+            
+            // Show helpful error message
+            let errorMsg = 'Search failed!\n\n';
+            if (error.message.includes('API returned')) {
+              errorMsg += 'Connection issue. Try again in a moment.';
+            } else if (error.message.includes('Could not find')) {
+              errorMsg += error.message;
+            } else {
+              errorMsg += 'Try:\n1. Include brand name (e.g., "Coles eggs")\n2. Be specific (e.g., "Woolworths Greek yogurt 200g")\n3. Check spelling';
+            }
+            
+            alert(errorMsg);
+            
+            // Offer manual entry as fallback
+            const useManual = confirm('Would you like to enter nutrition data manually instead?');
+            if (useManual) {
+              setSearchResults({
+                food: searchQuery || 'Manual Entry',
+                brand: '',
+                serving: searchAmount || '',
+                calories: 0,
+                protein: 0,
+                carbs: 0,
+                fats: 0,
+                manual: true
+              });
+            }
+          } finally {
+            setIsSearching(false);
+          }
+        };
+
+        // Save customized item
+        const saveCustomizedItem = () => {
+          if (!searchResults || !editingItem) return;
+
+          const { mealKey, itemId } = editingItem;
+          
+          const newCustomized = {
+            ...customizedMeals,
+            [mealKey]: {
+              ...customizedMeals[mealKey],
+              [itemId]: {
+                ...searchResults,
+                customizedAt: new Date().toISOString()
+              }
+            }
+          };
+
+          setCustomizedMeals(newCustomized);
+          storage.set('customizedMeals', newCustomized);
+
+          setEditingItem(null);
+          setSearchQuery('');
+          setSearchAmount('');
+          setSearchResults(null);
+        };
+
+        // Remove customization
+        const removeCustomization = (mealKey, itemId) => {
+          const newCustomized = { ...customizedMeals };
+          if (newCustomized[mealKey]) {
+            delete newCustomized[mealKey][itemId];
+            if (Object.keys(newCustomized[mealKey]).length === 0) {
+              delete newCustomized[mealKey];
+            }
+          }
+
+          setCustomizedMeals(newCustomized);
+          storage.set('customizedMeals', newCustomized);
+        };
+
+        // Toggle meal check
+        const toggleMealCheck = async (mealKey) => {
+          const newChecks = {
+            ...mealChecks,
+            [today]: {
+              ...todayChecks,
+              [mealKey]: !todayChecks[mealKey]
+            }
+          };
+          saveData('mealChecks', newChecks, setMealChecks);
+        };
+
+        const dailyTotals = calculateDailyTotals();
+
+        return (
+          <div className="p-4 space-y-4 pb-20">
+            {/* Header */}
+            <div className="bg-slate-800 rounded-lg p-4 text-center">
+              <h2 className="viking-title text-2xl font-bold text-amber-400 mb-1">
+                WARRIOR FUEL
+              </h2>
+              <p className="text-slate-400 text-sm mb-3">Track Your Exact Brands</p>
+              
+              {/* Daily Totals */}
+              <div className="bg-slate-900 rounded-lg p-3">
+                <div className="text-3xl font-bold text-white mb-1">{dailyTotals.calories}</div>
+                <div className="text-xs text-slate-400 mb-2">calories today</div>
+                <div className="flex justify-center gap-4 text-xs">
+                  <div><span className="text-slate-500">P:</span> <span className="text-white font-bold">{dailyTotals.protein}g</span></div>
+                  <div><span className="text-slate-500">C:</span> <span className="text-white font-bold">{dailyTotals.carbs}g</span></div>
+                  <div><span className="text-slate-500">F:</span> <span className="text-white font-bold">{dailyTotals.fats}g</span></div>
+                </div>
+              </div>
+            </div>
+
+            {/* Meals */}
+            {Object.entries(MEAL_PLAN).map(([mealKey, meal]) => {
+              const isChecked = todayChecks[mealKey];
+              const mealTotals = calculateMealTotals(mealKey);
+              const customized = customizedMeals[mealKey] || {};
+
+              return (
+                <div key={mealKey} className="bg-slate-800 rounded-lg p-4 border border-slate-700">
+                  {/* Meal Header */}
+                  <div className="flex items-center gap-3 mb-3">
+                    <button
+                      onClick={() => toggleMealCheck(mealKey)}
+                      className={`w-6 h-6 rounded border-2 flex items-center justify-center ${
+                        isChecked ? 'bg-amber-600 border-amber-600 text-white' : 'border-slate-600'
+                      }`}
+                    >
+                      {isChecked && '✓'}
+                    </button>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-white">{meal.name}</h3>
+                      <div className="text-xs text-slate-400">🕐 {meal.time}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-amber-400 font-bold">{mealTotals.calories} cal</div>
+                      {!mealTotals.isEstimate && (
+                        <div className="text-xs text-slate-400">
+                          P:{mealTotals.protein} C:{mealTotals.carbs} F:{mealTotals.fats}
+                        </div>
+                      )}
+                      {mealTotals.isEstimate && (
+                        <div className="text-xs text-amber-600">estimate</div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Food Items */}
+                  <div className="space-y-2">
+                    {meal.items.map(item => {
+                      const customItem = customized[item.id];
+                      const isEditing = editingItem?.mealKey === mealKey && editingItem?.itemId === item.id;
+
+                      return (
+                        <div key={item.id} className="bg-slate-900 rounded p-2">
+                          {!customItem && !isEditing && (
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1">
+                                <div className="text-sm text-slate-400">{item.name}</div>
+                                <div className="text-xs text-slate-500">{item.amount}</div>
+                              </div>
+                              <button
+                                onClick={() => {
+                                  setEditingItem({ mealKey, itemId: item.id });
+                                  setSearchQuery(item.name);
+                                  setSearchAmount(item.amount);
+                                }}
+                                className="text-xs text-amber-400 hover:text-amber-300"
+                              >
+                                + Add Brand
+                              </button>
+                            </div>
+                          )}
+
+                          {customItem && !isEditing && (
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <div className="text-sm text-white font-semibold">{customItem.food}</div>
+                                {customItem.brand && (
+                                  <div className="text-xs text-amber-400">{customItem.brand}</div>
+                                )}
+                                <div className="text-xs text-slate-500">{customItem.serving}</div>
+                                <div className="text-xs text-slate-400 mt-1">
+                                  {customItem.calories}cal • P:{customItem.protein}g C:{customItem.carbs}g F:{customItem.fats}g
+                                </div>
+                              </div>
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => {
+                                    setEditingItem({ mealKey, itemId: item.id });
+                                    setSearchQuery(customItem.food);
+                                    setSearchAmount(customItem.serving);
+                                  }}
+                                  className="text-xs text-blue-400"
+                                >
+                                  Edit
+                                </button>
+                                <button
+                                  onClick={() => removeCustomization(mealKey, item.id)}
+                                  className="text-xs text-red-400"
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                            </div>
+                          )}
+
+                          {isEditing && (
+                            <div className="space-y-2 pt-2">
+                              <div className="text-xs text-slate-400 bg-slate-800 p-2 rounded">
+                                💡 <strong>Search Tips:</strong> Include brand names for best results (e.g., "Coles Free Range Eggs" or "Woolworths Greek Yogurt")
+                              </div>
+                              
+                              <input
+                                type="text"
+                                placeholder="Food + brand (e.g., Coles Free Range Eggs)"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full bg-slate-800 border border-slate-600 rounded px-3 py-2 text-white text-sm"
+                              />
+                              <input
+                                type="text"
+                                placeholder="Amount (e.g., 3 eggs, 200ml, 100g)"
+                                value={searchAmount}
+                                onChange={(e) => setSearchAmount(e.target.value)}
+                                className="w-full bg-slate-800 border border-slate-600 rounded px-3 py-2 text-white text-sm"
+                              />
+
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={searchNutrition}
+                                  disabled={isSearching}
+                                  className="flex-1 bg-amber-600 text-white py-2 rounded text-sm font-semibold disabled:bg-slate-600"
+                                >
+                                  {isSearching ? '🔍 Searching...' : '🔍 Search Database'}
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setEditingItem(null);
+                                    setSearchQuery('');
+                                    setSearchAmount('');
+                                    setSearchResults(null);
+                                  }}
+                                  className="bg-slate-700 text-white px-4 py-2 rounded text-sm"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+
+                              {searchResults && (
+                                <div className="mt-2 p-3 bg-slate-800 rounded border border-amber-600/30">
+                                  {searchResults.manual ? (
+                                    <>
+                                      <div className="text-xs text-amber-400 mb-2">Manual Entry Mode</div>
+                                      <input
+                                        type="text"
+                                        placeholder="Food name"
+                                        value={searchResults.food}
+                                        onChange={(e) => setSearchResults({...searchResults, food: e.target.value})}
+                                        className="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white text-sm mb-2"
+                                      />
+                                      <input
+                                        type="text"
+                                        placeholder="Brand (optional)"
+                                        value={searchResults.brand}
+                                        onChange={(e) => setSearchResults({...searchResults, brand: e.target.value})}
+                                        className="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white text-sm mb-2"
+                                      />
+                                      <input
+                                        type="text"
+                                        placeholder="Serving size"
+                                        value={searchResults.serving}
+                                        onChange={(e) => setSearchResults({...searchResults, serving: e.target.value})}
+                                        className="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white text-sm mb-2"
+                                      />
+                                      <div className="grid grid-cols-4 gap-2 mb-2">
+                                        <input
+                                          type="number"
+                                          placeholder="Cals"
+                                          value={searchResults.calories || ''}
+                                          onChange={(e) => setSearchResults({...searchResults, calories: parseInt(e.target.value) || 0})}
+                                          className="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white text-sm"
+                                        />
+                                        <input
+                                          type="number"
+                                          placeholder="Protein"
+                                          value={searchResults.protein || ''}
+                                          onChange={(e) => setSearchResults({...searchResults, protein: parseInt(e.target.value) || 0})}
+                                          className="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white text-sm"
+                                        />
+                                        <input
+                                          type="number"
+                                          placeholder="Carbs"
+                                          value={searchResults.carbs || ''}
+                                          onChange={(e) => setSearchResults({...searchResults, carbs: parseInt(e.target.value) || 0})}
+                                          className="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white text-sm"
+                                        />
+                                        <input
+                                          type="number"
+                                          placeholder="Fats"
+                                          value={searchResults.fats || ''}
+                                          onChange={(e) => setSearchResults({...searchResults, fats: parseInt(e.target.value) || 0})}
+                                          className="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white text-sm"
+                                        />
+                                      </div>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <div className="text-sm font-bold text-white">{searchResults.food}</div>
+                                      {searchResults.brand && (
+                                        <div className="text-xs text-amber-400 mt-1">{searchResults.brand}</div>
+                                      )}
+                                      <div className="text-xs text-slate-400 mb-2">{searchResults.serving}</div>
+                                      <div className="grid grid-cols-4 gap-2 text-xs mb-2">
+                                        <div>
+                                          <div className="text-slate-500">Cals</div>
+                                          <div className="text-white font-bold">{searchResults.calories}</div>
+                                        </div>
+                                        <div>
+                                          <div className="text-slate-500">Protein</div>
+                                          <div className="text-white font-bold">{searchResults.protein}g</div>
+                                        </div>
+                                        <div>
+                                          <div className="text-slate-500">Carbs</div>
+                                          <div className="text-white font-bold">{searchResults.carbs}g</div>
+                                        </div>
+                                        <div>
+                                          <div className="text-slate-500">Fats</div>
+                                          <div className="text-white font-bold">{searchResults.fats}g</div>
+                                        </div>
+                                      </div>
+                                    </>
+                                  )}
+                                  <button
+                                    onClick={saveCustomizedItem}
+                                    className="w-full bg-green-600 text-white py-2 rounded text-sm font-semibold"
+                                  >
+                                    ✓ Save This Item
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* Targets */}
+            <div className="bg-slate-800 rounded-lg p-4 border border-amber-600/30">
+              <h3 className="text-amber-400 font-bold mb-2">⚡ DAILY TARGETS</h3>
+              <div className="space-y-1 text-sm text-slate-300">
+                <div className="flex justify-between">
+                  <span>Calories:</span>
+                  <span className="text-amber-400 font-bold">3,500-3,700</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Protein:</span>
+                  <span className="text-amber-400 font-bold">200-220g</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Carbs:</span>
+                  <span className="text-amber-400 font-bold">350-450g</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Fats:</span>
+                  <span className="text-amber-400 font-bold">80-100g</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      };
+      // ============================================
+      // BOTTOM NAV
+      // ============================================
+      
+      const BottomNav = () => {
+        const tabs = [
+          { id: 'home', icon: '🏠', label: 'Home' },
+          { id: 'workouts', icon: '⚔️', label: 'Train' },
+          { id: 'progress', icon: '📊', label: 'Progress' },
+          { id: 'meals', icon: '🍖', label: 'Fuel' },
+        ];
+
+        return (
+          <div className="fixed bottom-0 left-0 right-0 bg-slate-900 border-t-2 border-amber-600/30">
+            <div className="flex">
+              {tabs.map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex-1 py-3 text-center ${
+                    activeTab === tab.id 
+                      ? 'bg-amber-600/20 border-t-2 border-amber-600' 
+                      : 'text-slate-500'
+                  }`}
+                >
+                  <div className="text-xl mb-1">{tab.icon}</div>
+                  <div className={`text-xs font-semibold ${
+                    activeTab === tab.id ? 'text-amber-400' : 'text-slate-400'
+                  }`}>
+                    {tab.label}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+      };
+
+      // ============================================
+      // RENDER
+      // ============================================
+      
+      return (
+        <div className="min-h-screen bg-slate-900">
+          {activeTab === 'home' && <HomeTab />}
+          {activeTab === 'workouts' && <WorkoutsTab />}
+          {activeTab === 'progress' && <ProgressTab />}
+          {activeTab === 'meals' && <MealsTab />}
+          <BottomNav />
+        </div>
+      );
+    }
+
+    ReactDOM.render(<NorthmanApp />, document.getElementById('root'));
+  </script>
+</body>
+</html>
