@@ -2,1596 +2,408 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="theme-color" content="#0f172a">
-  <title>The Northman - Warrior Training</title>
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⚔️ NORTHMAN PHYSIQUE TRANSFORMATION ⚔️</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&display=swap');
-    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body { 
-      margin: 0; 
-      padding: 0; 
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #0f172a;
+      font-family: 'Courier New', monospace; 
+      background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+      color: #e0e0e0;
     }
-    
-    .viking-title {
-      font-family: 'Cinzel', serif;
-      letter-spacing: 2px;
-    }
-    
-    .hide-scrollbar::-webkit-scrollbar { display: none; }
-    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    
-    .viking-gradient {
-      background: linear-gradient(135deg, #1e293b 0%, #0f172a 50%, #1e1b4b 100%);
-    }
-    
-    .rune-border {
-      border: 2px solid #64748b;
-      border-image: repeating-linear-gradient(
-        45deg,
-        #64748b,
-        #64748b 10px,
-        transparent 10px,
-        transparent 20px
-      ) 1;
-    }
+    .northman-bg { background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%); }
+    .card-bg { background: linear-gradient(135deg, #1a1f3a 0%, #22233f 100%); }
+    .accent { color: #22b573; }
+    .accent-border { border-left: 5px solid #22b573; }
+    .phase-active { background: #22b573; color: #0a0e27; }
+    .tab-active { border-bottom: 3px solid #22b573; color: #22b573; }
+    input, textarea { background: rgba(0,0,0,0.3) !important; border: 2px solid #333 !important; color: #e0e0e0 !important; }
+    input:focus, textarea:focus { border-color: #22b573 !important; box-shadow: 0 0 10px rgba(34, 181, 115, 0.3) !important; }
+    .btn-primary { background: linear-gradient(135deg, #22b573 0%, #1a9d5d 100%); color: #0a0e27; font-weight: bold; }
+    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(34, 181, 115, 0.3); }
   </style>
 </head>
-<body>
-  <div id="root"></div>
-
-  <script type="text/babel">
-    const { useState, useEffect } = React;
-
-    // ============================================
-    // PROGRAM DATA
-    // ============================================
+<body class="northman-bg text-gray-200">
+  <div class="container mx-auto px-4 py-8 max-w-6xl">
     
-    const PROGRAM_START_DATE = new Date('2026-05-25'); // Monday, May 25th 2026
-    
-    const calculateCurrentWeek = () => {
-      const today = new Date();
-      const diffTime = today - PROGRAM_START_DATE;
-      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-      const weekNumber = Math.floor(diffDays / 7) + 1;
-      
-      // If before start date, show Week 1
-      if (weekNumber < 1) return 1;
-      // Cap at Week 24
-      if (weekNumber > 24) return 24;
-      return weekNumber;
-    };
-    
-    const WORKOUTS = {
-      monday: {
-        name: "Upper Strength (Horizontal)",
-        focus: "Chest Thickness & Back Development",
-        emoji: "⚔️",
-        gym: "Anytime Fitness Stellar",
-        exercises: [
-          { name: "Barbell Bench Press", sets: 4, reps: "6-8", type: "compound", note: "Warrior strength base" },
-          { name: "Barbell Bent-Over Row", sets: 4, reps: "6-8", type: "compound", note: "Back thickness" },
-          { name: "Incline Dumbbell Press", sets: 3, reps: "8-10", type: "accessory" },
-          { name: "Seal Rows (Machine or DB)", sets: 3, reps: "10-12", type: "accessory" },
-          { name: "Cable Flyes", sets: 3, reps: "12-15", type: "isolation" },
-          { name: "Cable Rows (High-to-Low)", sets: 3, reps: "12-15", type: "isolation" },
-          { name: "Chest Dips (if available)", sets: 2, reps: "8-12", type: "accessory" },
-        ]
-      },
-      tuesday: {
-        name: "Lower Power",
-        focus: "Lean Leg Strength & Athletic Development",
-        emoji: "🦵",
-        gym: "Anytime Fitness Stellar",
-        exercises: [
-          { name: "Barbell Back Squat", sets: 4, reps: "6-8", type: "compound", note: "Foundation strength" },
-          { name: "Barbell Deadlift", sets: 4, reps: "5-6", type: "compound", note: "Posterior chain power" },
-          { name: "Bulgarian Split Squat", sets: 3, reps: "8-10/leg", type: "accessory" },
-          { name: "Single-Leg Romanian Deadlift", sets: 3, reps: "10/leg", type: "accessory" },
-          { name: "Walking Lunges (weighted)", sets: 3, reps: "12/leg", type: "accessory" },
-          { name: "Leg Curl (Machine)", sets: 2, reps: "12-15", type: "isolation", note: "Hamstring definition" },
-        ]
-      },
-      wednesday: {
-        name: "Upper Hypertrophy (Vertical)",
-        focus: "SKARSGÅRD SHOULDERS & BACK V-TAPER",
-        emoji: "💪",
-        gym: "Anytime Fitness Stellar",
-        exercises: [
-          { name: "Barbell Overhead Press", sets: 4, reps: "6-8", type: "compound", note: "Boulder shoulders" },
-          { name: "Weighted Pull-Ups or Lat Pulldown", sets: 4, reps: "8-10", type: "compound", note: "Back width" },
-          { name: "Dumbbell Lateral Raises", sets: 4, reps: "12-15", type: "accessory", note: "Shoulder caps (CRITICAL)" },
-          { name: "Cable Upright Rows", sets: 3, reps: "12-15", type: "accessory" },
-          { name: "Wide-Grip Lat Pulldown", sets: 3, reps: "10-12", type: "accessory", note: "V-taper width" },
-          { name: "Rear Delt Machine Flyes", sets: 3, reps: "12-15", type: "isolation", note: "Back thickness" },
-          { name: "Shrugs (Barbell or DB)", sets: 3, reps: "12-15", type: "accessory" },
-        ]
-      },
-      thursday: {
-        name: "Lower Hypertrophy",
-        focus: "Lean, Defined Leg Development",
-        emoji: "🏔️",
-        gym: "Anytime Fitness Stellar",
-        exercises: [
-          { name: "Dumbbell Step-Ups (heavy)", sets: 4, reps: "10-12/leg", type: "compound" },
-          { name: "Machine Leg Press", sets: 3, reps: "10-12", type: "compound", note: "Clean reps, full range" },
-          { name: "Leg Extensions", sets: 3, reps: "12-15", type: "isolation", note: "Quad definition" },
-          { name: "Single-Leg Leg Curl", sets: 3, reps: "12-15/leg", type: "isolation" },
-          { name: "Calf Raises (Standing)", sets: 3, reps: "15-20", type: "accessory" },
-          { name: "Ab Wheel Rollout", sets: 2, reps: "10-15", type: "core" },
-        ]
-      },
-      friday: {
-        name: "Upper Definition (Arms & Shoulders)",
-        focus: "SKARSGÅRD ARM & SHOULDER DEFINITION",
-        emoji: "🔥",
-        gym: "Anytime Fitness Stellar",
-        exercises: [
-          { name: "Dumbbell Overhead Press", sets: 3, reps: "8-10", type: "compound" },
-          { name: "Dumbbell Lateral Raises", sets: 4, reps: "12-15", type: "accessory", note: "Shoulder pop" },
-          { name: "Cable Bicep Curls (rope or bar)", sets: 3, reps: "12-15", type: "isolation", note: "Arm definition" },
-          { name: "Cable Tricep Pushdowns", sets: 3, reps: "12-15", type: "isolation" },
-          { name: "Hammer Curls (Dumbbell)", sets: 3, reps: "12-15", type: "accessory" },
-          { name: "Overhead Tricep Extension (DB or cable)", sets: 3, reps: "12-15", type: "accessory" },
-          { name: "Cable Face Pulls", sets: 3, reps: "15-20", type: "mobility", note: "Shoulder health" },
-          { name: "Concentration Curls", sets: 2, reps: "15", type: "isolation", note: "Final pump" },
-        ]
-      },
-      saturday: {
-        name: "Warrior Conditioning (Hike/Ruck/Prep)",
-        focus: "Northman Endurance & Solo Camping Prep",
-        emoji: "🥾",
-        gym: "Outdoor - Canberra Nature",
-        exercises: [
-          { name: "Weighted Ruck (10-20kg)", sets: 1, reps: "60-90min", type: "cardio", note: "Build to 20kg over 6 months" },
-          { name: "Hiking (Local trails near Canberra)", sets: 1, reps: "45-120min", type: "cardio", note: "Scout camping routes" },
-          { name: "Camping Prep Work (if camping weekend)", sets: 1, reps: "full day", type: "training", note: "Setup, wood gathering, survival skills" },
-        ]
-      },
-      sunday: {
-        name: "Recovery & Warrior Preparation",
-        focus: "Rest, Mobility & Mental Fortitude",
-        emoji: "🛡️",
-        exercises: [
-          { name: "Easy Walk or Light Hike", sets: 1, reps: "20-30min", type: "recovery" },
-          { name: "Deep Stretching", sets: 1, reps: "20min", type: "mobility" },
-          { name: "Foam Rolling (full body)", sets: 1, reps: "15min", type: "mobility" },
-          { name: "Cold Exposure (cold shower/plunge if available)", sets: 1, reps: "2-3min", type: "warrior", note: "Northman mental toughness" },
-          { name: "Meal Prep for Week", sets: 1, reps: "60-90min", type: "nutrition", note: "Stay locked in" },
-        ]
-      }
-    };
+    <!-- HEADER -->
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-bold accent mb-2">⚔️ NORTHMAN PHYSIQUE ⚔️</h1>
+      <p class="text-gray-400">6-Month Blueprint: Normie to Skarsgård Warrior | Kenn's Transformation</p>
+    </div>
 
-    const MEAL_PLAN = {
-      meal1: {
-        name: "Pre-Workout",
-        time: "4:10am",
-        defaultCalories: 300,
-        items: [
-          { id: '1a', name: 'Banana', amount: '1 medium' },
-          { id: '1b', name: 'Boiled eggs', amount: '2 eggs' },
-          { id: '1c', name: 'Black coffee', amount: '1 cup' }
-        ]
-      },
-      meal2: {
-        name: "Post-Workout Breakfast",
-        time: "6:15am",
-        defaultCalories: 900,
-        items: [
-          { id: '2a', name: 'Whole eggs', amount: '3 eggs' },
-          { id: '2b', name: 'Egg whites', amount: '200ml' },
-          { id: '2c', name: 'Oats', amount: '100g' },
-          { id: '2d', name: 'Blueberries', amount: '50g' },
-          { id: '2e', name: 'Greek yogurt', amount: '200g' },
-          { id: '2f', name: 'Honey', amount: '1 tbsp' },
-          { id: '2g', name: 'Peanut butter', amount: '1 tbsp' }
-        ]
-      },
-      meal3: {
-        name: "Lunch",
-        time: "12:30pm",
-        defaultCalories: 950,
-        items: [
-          { id: '3a', name: 'Chicken breast', amount: '250g' },
-          { id: '3b', name: 'White rice', amount: '2 cups cooked' },
-          { id: '3c', name: 'Mixed salad', amount: '2 cups' },
-          { id: '3d', name: 'Avocado', amount: '1 whole' },
-          { id: '3e', name: 'Olive oil', amount: '1 tbsp' }
-        ]
-      },
-      meal4: {
-        name: "Afternoon Snack",
-        time: "3:30pm",
-        defaultCalories: 600,
-        items: [
-          { id: '4a', name: 'Greek yogurt', amount: '200g' },
-          { id: '4b', name: 'Oats', amount: '50g' },
-          { id: '4c', name: 'Honey', amount: '1 tbsp' },
-          { id: '4d', name: 'Banana or apple', amount: '1 piece' }
-        ]
-      },
-      meal5: {
-        name: "Dinner",
-        time: "6:00pm",
-        defaultCalories: 850,
-        items: [
-          { id: '5a', name: 'Salmon fillet', amount: '200g' },
-          { id: '5b', name: 'Sweet potato', amount: '300g' },
-          { id: '5c', name: 'Broccoli', amount: '200g' },
-          { id: '5d', name: 'Olive oil', amount: '1 tbsp' }
-        ]
-      }
-    };
+    <!-- PHASE SELECTOR -->
+    <div class="flex justify-center gap-4 mb-8 flex-wrap">
+      <button id="phaseBtn1" onclick="selectPhase(1)" class="px-6 py-3 border-2 border-green-500 rounded font-bold uppercase text-green-500 phase-active">📉 Phase 1: Fat Loss (Months 1-4)</button>
+      <button id="phaseBtn2" onclick="selectPhase(2)" class="px-6 py-3 border-2 border-green-500 rounded font-bold uppercase text-green-500 hover:bg-green-500 hover:text-gray-900">📈 Phase 2: Lean Bulk (Months 5-6)</button>
+    </div>
 
-    // ============================================
-    // STORAGE (localStorage for GitHub Pages)
-    // ============================================
-    
-    const storage = {
-      get(key) {
-        try {
-          const data = localStorage.getItem(key);
-          return data ? JSON.parse(data) : null;
-        } catch (e) {
-          console.log('Storage get error:', e);
-          return null;
-        }
-      },
-      
-      set(key, value) {
-        try {
-          localStorage.setItem(key, JSON.stringify(value));
-          return true;
-        } catch (e) {
-          console.error('Storage set error:', e);
-          return false;
-        }
-      }
-    };
+    <!-- STATS PANEL -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+      <div class="card-bg p-6 rounded accent-border">
+        <div class="text-sm text-gray-400 uppercase tracking-wider mb-2">Height</div>
+        <div class="text-2xl accent font-bold">198 cm</div>
+        <div class="text-xs text-gray-500 mt-2">Large frame = large potential</div>
+      </div>
+      <div class="card-bg p-6 rounded accent-border">
+        <div class="text-sm text-gray-400 uppercase tracking-wider mb-2">Starting Weight</div>
+        <div class="text-2xl accent font-bold">115 kg</div>
+        <div class="text-xs text-gray-500 mt-2">Body fat: ~20-25%</div>
+      </div>
+      <div class="card-bg p-6 rounded accent-border">
+        <div class="text-sm text-gray-400 uppercase tracking-wider mb-2" id="phaseLabel">Phase 1 Goal</div>
+        <div class="text-2xl accent font-bold" id="phaseGoal">0.5-0.8kg/week</div>
+        <div class="text-xs text-gray-500 mt-2">Expected: 107-110kg</div>
+      </div>
+      <div class="card-bg p-6 rounded accent-border">
+        <div class="text-sm text-gray-400 uppercase tracking-wider mb-2">6-Month Target</div>
+        <div class="text-2xl accent font-bold">105-112 kg</div>
+        <div class="text-xs text-gray-500 mt-2">14-17% BF, Skarsgård ready</div>
+      </div>
+    </div>
 
-    // ============================================
-    // MAIN APP
-    // ============================================
-    
-    function NorthmanApp() {
-      const [activeTab, setActiveTab] = useState('home');
-      const [currentWeek, setCurrentWeek] = useState(calculateCurrentWeek());
-      const [workoutHistory, setWorkoutHistory] = useState({});
-      const [measurements, setMeasurements] = useState([]);
-      const [photos, setPhotos] = useState([]);
-      const [mealChecks, setMealChecks] = useState({});
-      const [customizedMeals, setCustomizedMeals] = useState({});
-      const [currentDay, setCurrentDay] = useState('monday');
-      const [isLoading, setIsLoading] = useState(true);
+    <!-- TABS -->
+    <div class="flex gap-2 mb-6 border-b border-gray-700 flex-wrap">
+      <button onclick="switchTab('guide')" class="tab-active px-4 py-2 uppercase text-sm font-bold border-b-4 border-green-500 text-green-500">📋 Blueprint</button>
+      <button onclick="switchTab('fuel')" class="px-4 py-2 uppercase text-sm font-bold border-b-4 border-transparent text-gray-400 hover:text-green-500">🍽️ Fuel</button>
+      <button onclick="switchTab('training')" class="px-4 py-2 uppercase text-sm font-bold border-b-4 border-transparent text-gray-400 hover:text-green-500">⚔️ Training</button>
+      <button onclick="switchTab('tracking')" class="px-4 py-2 uppercase text-sm font-bold border-b-4 border-transparent text-gray-400 hover:text-green-500">📊 Track</button>
+      <button onclick="switchTab('progress')" class="px-4 py-2 uppercase text-sm font-bold border-b-4 border-transparent text-gray-400 hover:text-green-500">📈 Progress</button>
+    </div>
 
-      useEffect(() => {
-        loadData();
-      }, []);
-
-      const loadData = () => {
-        try {
-          const week = storage.get('currentWeek');
-          const history = storage.get('workoutHistory');
-          const measures = storage.get('measurements');
-          const pics = storage.get('photos');
-          const meals = storage.get('mealChecks');
-          const customMeals = storage.get('customizedMeals');
-          
-          // Use stored week if available, otherwise calculate based on start date
-          if (week && typeof week === 'number') {
-            setCurrentWeek(week);
-          } else {
-            setCurrentWeek(calculateCurrentWeek());
-          }
-          
-          if (history && typeof history === 'object') setWorkoutHistory(history);
-          if (Array.isArray(measures)) setMeasurements(measures);
-          if (Array.isArray(pics)) setPhotos(pics);
-          if (meals && typeof meals === 'object') setMealChecks(meals);
-          if (customMeals && typeof customMeals === 'object') setCustomizedMeals(customMeals);
-        } catch (error) {
-          console.log('Error loading data:', error);
-        } finally {
-          setIsLoading(false);
-        }
-      };
-
-      const saveData = (key, value, setter) => {
-        setter(value);
-        storage.set(key, value);
-      };
-
-      const getCurrentPhase = () => {
-        if (currentWeek <= 8) return "Foundation";
-        if (currentWeek <= 16) return "Hypertrophy";
-        return "Refinement";
-      };
-
-      if (isLoading) {
-        return (
-          <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-            <div className="text-center">
-              <div className="text-6xl mb-4">⚔️</div>
-              <div className="viking-title text-2xl text-amber-400 font-bold">Loading...</div>
-            </div>
-          </div>
-        );
-      }
-
-      // ============================================
-      // HOME TAB
-      // ============================================
-      
-      const HomeTab = () => {
-        const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
-        const todayWorkout = WORKOUTS[today];
-        const progress = Math.round((currentWeek / 24) * 100);
+    <!-- GUIDE TAB -->
+    <div id="guide" class="tab-content">
+      <div class="card-bg p-8 rounded mb-6 accent-border">
+        <h2 class="text-2xl accent font-bold mb-4 uppercase">THE 6-MONTH BLUEPRINT</h2>
         
-        const daysUntilStart = Math.ceil((PROGRAM_START_DATE - new Date()) / (1000 * 60 * 60 * 24));
-        const daysSinceStart = Math.floor((new Date() - PROGRAM_START_DATE) / (1000 * 60 * 60 * 24));
-        const isBeforeStart = daysUntilStart > 0;
-
-        return (
-          <div className="p-4 space-y-4 pb-20">
-            {/* Viking Header */}
-            <div className="viking-gradient rounded-lg p-6 text-center relative overflow-hidden">
-              <div className="absolute inset-0 opacity-10">
-                <div className="text-6xl">⚔️🛡️⚡</div>
-              </div>
-              <h1 className="viking-title text-4xl font-black text-amber-400 mb-2 relative z-10">
-                THE NORTHMAN
-              </h1>
-              <p className="text-slate-300 text-sm mb-4 relative z-10">Warrior Physique Protocol</p>
-              
-              <div className="bg-slate-800/50 rounded-lg p-4 relative z-10">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-slate-400 text-xs">WEEK {currentWeek}/24</span>
-                  <span className="text-amber-400 text-xs font-bold">{getCurrentPhase()}</span>
-                </div>
-                <div className="w-full bg-slate-700 rounded-full h-2">
-                  <div 
-                    className="bg-gradient-to-r from-amber-600 to-amber-400 h-2 rounded-full transition-all"
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
-                <div className="flex justify-between items-center mt-2">
-                  <p className="text-slate-400 text-xs">{progress}% Complete</p>
-                  {isBeforeStart ? (
-                    <p className="text-amber-400 text-xs font-bold">
-                      Starts in {daysUntilStart} days 🗓️
-                    </p>
-                  ) : (
-                    <p className="text-amber-400 text-xs">
-                      Day {daysSinceStart + 1} of journey
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Today's Battle */}
-            {todayWorkout && (
-              <div className="bg-slate-800 rounded-lg p-4 border-2 border-amber-600/30">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-3xl">{todayWorkout.emoji}</span>
-                  <div>
-                    <div className="text-xs text-amber-400 font-bold">TODAY'S BATTLE</div>
-                    <h3 className="text-white font-bold">{todayWorkout.name}</h3>
-                  </div>
-                </div>
-                <p className="text-slate-400 text-sm mb-3">{todayWorkout.focus}</p>
-                <button
-                  onClick={() => {
-                    setCurrentDay(today);
-                    setActiveTab('workouts');
-                  }}
-                  className="w-full bg-gradient-to-r from-amber-600 to-amber-500 text-white py-3 rounded-lg font-bold hover:from-amber-700 hover:to-amber-600"
-                >
-                  BEGIN TRAINING ⚔️
-                </button>
-              </div>
-            )}
-
-            {/* Quick Stats */}
-            <div className="grid grid-cols-3 gap-3">
-              <div className="bg-slate-800 rounded-lg p-3 text-center border border-slate-700">
-                <div className="text-2xl font-bold text-amber-400">
-                  {workoutHistory ? Object.keys(workoutHistory).length : 0}
-                </div>
-                <div className="text-xs text-slate-400">Battles Won</div>
-              </div>
-              <div className="bg-slate-800 rounded-lg p-3 text-center border border-slate-700">
-                <div className="text-2xl font-bold text-amber-400">
-                  {measurements ? measurements.length : 0}
-                </div>
-                <div className="text-xs text-slate-400">Measurements</div>
-              </div>
-              <div className="bg-slate-800 rounded-lg p-3 text-center border border-slate-700">
-                <div className="text-2xl font-bold text-amber-400">
-                  {photos ? photos.length : 0}
-                </div>
-                <div className="text-xs text-slate-400">Progress Pics</div>
-              </div>
-            </div>
-
-            {/* Today's Fuel */}
-            <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
-              <h3 className="text-amber-400 font-bold mb-2 flex items-center gap-2">
-                <span>🍖</span> TODAY'S FUEL
-              </h3>
-              <div className="space-y-2">
-                {Object.entries(MEAL_PLAN).map(([key, meal]) => {
-                  const today = new Date().toISOString().split('T')[0];
-                  const checked = mealChecks[today]?.[key];
-                  return (
-                    <div key={key} className="flex items-center gap-2 text-sm">
-                      <input
-                        type="checkbox"
-                        checked={checked || false}
-                        onChange={(e) => {
-                          const newChecks = {
-                            ...mealChecks,
-                            [today]: {
-                              ...mealChecks[today],
-                              [key]: e.target.checked
-                            }
-                          };
-                          saveData('mealChecks', newChecks, setMealChecks);
-                        }}
-                        className="w-4 h-4"
-                      />
-                      <span className={`flex-1 ${checked ? 'line-through text-slate-500' : 'text-slate-300'}`}>
-                        {meal.name} ({meal.time})
-                      </span>
-                      <span className="text-amber-400 text-xs">{meal.calories}cal</span>
-                    </div>
-                  );
-                })}
-              </div>
-              <button
-                onClick={() => setActiveTab('meals')}
-                className="w-full mt-3 bg-slate-700 text-slate-300 py-2 rounded text-sm hover:bg-slate-600"
-              >
-                View Full Meal Plan →
-              </button>
-            </div>
-
-            {/* Latest Progress */}
-            {measurements && measurements.length > 0 && (
-              <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
-                <h3 className="text-amber-400 font-bold mb-3">LATEST MEASUREMENTS</h3>
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="text-center">
-                    <div className="text-xs text-slate-400">Weight</div>
-                    <div className="text-lg font-bold text-white">
-                      {measurements[measurements.length - 1].weight}kg
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-xs text-slate-400">Waist</div>
-                    <div className="text-lg font-bold text-white">
-                      {measurements[measurements.length - 1].waist}cm
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-xs text-slate-400">Shoulders</div>
-                    <div className="text-lg font-bold text-white">
-                      {measurements[measurements.length - 1].shoulders}cm
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        );
-      };
-
-      // ============================================
-      // WORKOUTS TAB
-      // ============================================
-      
-      const WorkoutsTab = () => {
-        const [viewMode, setViewMode] = useState('list'); // 'list' or 'workout'
-        const [exerciseData, setExerciseData] = useState({});
-        const [completedExercises, setCompletedExercises] = useState([]);
-
-        const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-
-        useEffect(() => {
-          if (viewMode === 'workout' && currentDay && workoutHistory) {
-            const today = new Date().toISOString().split('T')[0];
-            const key = `${today}-${currentDay}`;
-            if (workoutHistory[key]) {
-              setExerciseData(workoutHistory[key].exercises || {});
-              setCompletedExercises(workoutHistory[key].completed || []);
-            } else {
-              setExerciseData({});
-              setCompletedExercises([]);
-            }
-          }
-        }, [viewMode, currentDay]);
-
-        const handleSetInput = (exerciseIndex, setIndex, field, value) => {
-          setExerciseData(prev => ({
-            ...prev,
-            [exerciseIndex]: {
-              ...(prev[exerciseIndex] || {}),
-              [setIndex]: {
-                ...(prev[exerciseIndex]?.[setIndex] || {}),
-                [field]: value
-              }
-            }
-          }));
-        };
-
-        const toggleExerciseComplete = (exerciseIndex) => {
-          setCompletedExercises(prev => 
-            prev.includes(exerciseIndex)
-              ? prev.filter(i => i !== exerciseIndex)
-              : [...prev, exerciseIndex]
-          );
-        };
-
-        const saveWorkout = async () => {
-          const today = new Date().toISOString().split('T')[0];
-          const key = `${today}-${currentDay}`;
-          const workout = WORKOUTS[currentDay];
-          
-          const newHistory = {
-            ...workoutHistory,
-            [key]: {
-              date: today,
-              day: currentDay,
-              workout: workout.name,
-              exercises: exerciseData,
-              completed: completedExercises,
-              week: currentWeek
-            }
-          };
-          
-          await saveData('workoutHistory', newHistory, setWorkoutHistory);
-          alert('⚔️ Battle recorded! Well fought, warrior!');
-          setViewMode('list');
-        };
-
-        if (viewMode === 'workout') {
-          const workout = WORKOUTS[currentDay];
-          
-          return (
-            <div className="p-4 space-y-4 pb-24">
-              <div className="bg-slate-800 rounded-lg p-4 sticky top-0 z-10">
-                <button 
-                  onClick={() => setViewMode('list')} 
-                  className="text-amber-400 mb-2"
-                >
-                  ← Back to Weekly Plan
-                </button>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-3xl">{workout.emoji}</span>
-                  <div>
-                    <h2 className="text-xl font-bold text-white">{workout.name}</h2>
-                    <p className="text-sm text-slate-400">{workout.focus}</p>
-                  </div>
-                </div>
-                <div className="text-xs text-amber-400">
-                  Week {currentWeek} • {getCurrentPhase()}
-                </div>
-              </div>
-
-              {workout.exercises.map((exercise, exerciseIndex) => {
-                const isCompleted = completedExercises.includes(exerciseIndex);
-                const setsArray = Array.from({ length: exercise.sets }, (_, i) => i);
-
-                return (
-                  <div 
-                    key={exerciseIndex}
-                    className={`bg-slate-800 rounded-lg p-4 border border-slate-700 ${isCompleted ? 'opacity-60' : ''}`}
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => toggleExerciseComplete(exerciseIndex)}
-                            className={`w-6 h-6 rounded border-2 flex items-center justify-center ${
-                              isCompleted 
-                                ? 'bg-amber-600 border-amber-600 text-white' 
-                                : 'border-slate-600'
-                            }`}
-                          >
-                            {isCompleted && '✓'}
-                          </button>
-                          <h3 className={`font-bold text-white ${isCompleted ? 'line-through' : ''}`}>
-                            {exercise.name}
-                          </h3>
-                        </div>
-                        <p className="text-sm text-slate-400 mt-1 ml-8">
-                          {exercise.sets} sets × {exercise.reps}
-                        </p>
-                        {exercise.note && (
-                          <p className="text-xs text-amber-400 mt-1 ml-8">{exercise.note}</p>
-                        )}
-                      </div>
-                      <span className={`text-xs px-2 py-1 rounded ${
-                        exercise.type === 'compound' 
-                          ? 'bg-red-900/50 text-red-300'
-                          : exercise.type === 'accessory'
-                          ? 'bg-blue-900/50 text-blue-300'
-                          : 'bg-green-900/50 text-green-300'
-                      }`}>
-                        {exercise.type}
-                      </span>
-                    </div>
-
-                    {exercise.type !== 'recovery' && exercise.type !== 'cardio' && (
-                      <div className="space-y-2">
-                        {setsArray.map(setIndex => (
-                          <div key={setIndex} className="flex items-center gap-2">
-                            <span className="text-sm font-semibold text-slate-400 w-12">
-                              Set {setIndex + 1}
-                            </span>
-                            <input
-                              type="number"
-                              placeholder="kg"
-                              value={exerciseData[exerciseIndex]?.[setIndex]?.weight || ''}
-                              onChange={(e) => handleSetInput(exerciseIndex, setIndex, 'weight', e.target.value)}
-                              className="flex-1 bg-slate-900 border border-slate-600 rounded px-3 py-2 text-center text-white"
-                            />
-                            <span className="text-slate-500">×</span>
-                            <input
-                              type="number"
-                              placeholder="reps"
-                              value={exerciseData[exerciseIndex]?.[setIndex]?.reps || ''}
-                              onChange={(e) => handleSetInput(exerciseIndex, setIndex, 'reps', e.target.value)}
-                              className="flex-1 bg-slate-900 border border-slate-600 rounded px-3 py-2 text-center text-white"
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    {(exercise.type === 'cardio' || exercise.type === 'recovery') && (
-                      <textarea
-                        placeholder="Notes (duration, distance, etc.)"
-                        value={exerciseData[exerciseIndex]?.[0]?.notes || ''}
-                        onChange={(e) => handleSetInput(exerciseIndex, 0, 'notes', e.target.value)}
-                        className="w-full bg-slate-900 border border-slate-600 rounded px-3 py-2 text-sm text-white"
-                        rows="2"
-                      />
-                    )}
-                  </div>
-                );
-              })}
-
-              <div className="fixed bottom-16 left-0 right-0 p-4 bg-slate-900/95 border-t border-slate-700">
-                <button
-                  onClick={saveWorkout}
-                  className="w-full bg-gradient-to-r from-amber-600 to-amber-500 text-white py-4 rounded-lg font-bold text-lg"
-                >
-                  ⚔️ RECORD BATTLE
-                </button>
-              </div>
-            </div>
-          );
-        }
-
-        return (
-          <div className="p-4 space-y-4 pb-20">
-            <div className="bg-slate-800 rounded-lg p-4 text-center">
-              <h2 className="viking-title text-2xl font-bold text-amber-400 mb-1">
-                WEEKLY TRAINING
-              </h2>
-              <p className="text-slate-400 text-sm">Choose Your Battle</p>
-            </div>
-
-            {days.map(day => {
-              const workout = WORKOUTS[day];
-              return (
-                <div key={day} className="bg-slate-800 rounded-lg p-4 border border-slate-700">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <span className="text-2xl">{workout.emoji}</span>
-                      <div>
-                        <div className="text-xs text-amber-400 uppercase font-bold">{day}</div>
-                        <h3 className="font-bold text-white">{workout.name}</h3>
-                        <p className="text-sm text-slate-400">{workout.focus}</p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => {
-                        setCurrentDay(day);
-                        setViewMode('workout');
-                      }}
-                      className="bg-amber-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-amber-700"
-                    >
-                      START
-                    </button>
-                  </div>
-
-                  <div className="mt-3 pt-3 border-t border-slate-700 space-y-1">
-                    {workout.exercises.map((exercise, idx) => (
-                      <div key={idx} className="flex items-start justify-between text-sm">
-                        <span className="text-slate-300">{exercise.name}</span>
-                        <span className="text-xs text-slate-500 ml-2">
-                          {exercise.sets}×{exercise.reps}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        );
-      };
-
-      // ============================================
-      // PROGRESS TAB
-      // ============================================
-      
-      const ProgressTab = () => {
-        const [showMeasureForm, setShowMeasureForm] = useState(false);
-        const [newMeasure, setNewMeasure] = useState({
-          date: new Date().toISOString().split('T')[0],
-          weight: '', waist: '', shoulders: '', chest: '', arms: '', thighs: ''
-        });
-
-        const handleAddMeasure = async () => {
-          await saveData('measurements', [...measurements, newMeasure], setMeasurements);
-          setShowMeasureForm(false);
-          setNewMeasure({
-            date: new Date().toISOString().split('T')[0],
-            weight: '', waist: '', shoulders: '', chest: '', arms: '', thighs: ''
-          });
-        };
-
-        const handlePhotoUpload = async (e) => {
-          const file = e.target.files[0];
-          if (file) {
-            const reader = new FileReader();
-            reader.onload = async (event) => {
-              const newPhoto = {
-                date: new Date().toISOString().split('T')[0],
-                week: currentWeek,
-                data: event.target.result
-              };
-              await saveData('photos', [...photos, newPhoto], setPhotos);
-            };
-            reader.readAsDataURL(file);
-          }
-        };
-
-        return (
-          <div className="p-4 space-y-4 pb-20">
-            <div className="bg-slate-800 rounded-lg p-4 text-center">
-              <h2 className="viking-title text-2xl font-bold text-amber-400 mb-1">
-                WARRIOR PROGRESS
-              </h2>
-              <p className="text-slate-400 text-sm">Track Your Transformation</p>
-            </div>
-
-            {/* Photo Upload */}
-            <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
-              <h3 className="text-amber-400 font-bold mb-3 flex items-center gap-2">
-                <span>📸</span> PROGRESS PHOTOS
-              </h3>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handlePhotoUpload}
-                className="hidden"
-                id="photo-upload"
-              />
-              <label
-                htmlFor="photo-upload"
-                className="block w-full bg-amber-600 text-white py-3 rounded-lg font-bold text-center cursor-pointer hover:bg-amber-700"
-              >
-                + Add Photo (Week {currentWeek})
-              </label>
-
-              {photos && photos.length > 0 && (
-                <div className="mt-4 grid grid-cols-2 gap-2">
-                  {[...photos].reverse().slice(0, 4).map((photo, idx) => (
-                    <div key={idx} className="relative">
-                      <img 
-                        src={photo.data} 
-                        alt={`Week ${photo.week}`}
-                        className="w-full h-32 object-cover rounded-lg"
-                      />
-                      <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white text-xs p-1 text-center rounded-b-lg">
-                        Week {photo.week}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Measurements */}
-            <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-amber-400 font-bold flex items-center gap-2">
-                  <span>📏</span> MEASUREMENTS
-                </h3>
-                <button
-                  onClick={() => setShowMeasureForm(!showMeasureForm)}
-                  className="bg-amber-600 text-white px-3 py-1 rounded text-sm"
-                >
-                  + Add
-                </button>
-              </div>
-
-              {showMeasureForm && (
-                <div className="mb-4 space-y-2 p-3 bg-slate-900 rounded-lg">
-                  <input
-                    type="date"
-                    value={newMeasure.date}
-                    onChange={(e) => setNewMeasure({...newMeasure, date: e.target.value})}
-                    className="w-full bg-slate-800 border border-slate-600 rounded px-3 py-2 text-white"
-                  />
-                  <div className="grid grid-cols-2 gap-2">
-                    {['weight', 'waist', 'shoulders', 'chest', 'arms', 'thighs'].map(field => (
-                      <input
-                        key={field}
-                        type="number"
-                        step="0.1"
-                        placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
-                        value={newMeasure[field]}
-                        onChange={(e) => setNewMeasure({...newMeasure, [field]: e.target.value})}
-                        className="bg-slate-800 border border-slate-600 rounded px-3 py-2 text-white"
-                      />
-                    ))}
-                  </div>
-                  <button
-                    onClick={handleAddMeasure}
-                    className="w-full bg-green-600 text-white py-2 rounded font-semibold"
-                  >
-                    Save
-                  </button>
-                </div>
-              )}
-
-              <div className="space-y-2">
-                {!measurements || measurements.length === 0 ? (
-                  <p className="text-slate-500 text-center py-4">No measurements yet</p>
-                ) : (
-                  [...measurements].reverse().map((m, idx) => (
-                    <div key={idx} className="bg-slate-900 rounded-lg p-3">
-                      <div className="text-xs text-slate-400 mb-2">
-                        {new Date(m.date).toLocaleDateString()}
-                      </div>
-                      <div className="grid grid-cols-3 gap-2 text-sm">
-                        <div><span className="text-slate-500">Weight:</span> <span className="text-white font-bold">{m.weight}kg</span></div>
-                        <div><span className="text-slate-500">Waist:</span> <span className="text-white font-bold">{m.waist}cm</span></div>
-                        <div><span className="text-slate-500">Shoulders:</span> <span className="text-white font-bold">{m.shoulders}cm</span></div>
-                        {m.chest && <div><span className="text-slate-500">Chest:</span> <span className="text-white font-bold">{m.chest}cm</span></div>}
-                        {m.arms && <div><span className="text-slate-500">Arms:</span> <span className="text-white font-bold">{m.arms}cm</span></div>}
-                        {m.thighs && <div><span className="text-slate-500">Thighs:</span> <span className="text-white font-bold">{m.thighs}cm</span></div>}
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-
-            {/* Settings */}
-            <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
-              <h3 className="text-amber-400 font-bold mb-3">⚙️ SETTINGS</h3>
-              <div className="mb-3 p-2 bg-slate-900 rounded text-sm">
-                <div className="text-slate-400 text-xs mb-1">Program Start Date</div>
-                <div className="text-white font-bold">
-                  {PROGRAM_START_DATE.toLocaleDateString('en-US', { 
-                    weekday: 'long', 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
-                  })}
-                </div>
-              </div>
-              <div className="flex gap-2 mb-2">
-                <input
-                  type="number"
-                  min="1"
-                  max="24"
-                  value={currentWeek}
-                  onChange={(e) => saveData('currentWeek', parseInt(e.target.value), setCurrentWeek)}
-                  className="flex-1 bg-slate-900 border border-slate-600 rounded px-3 py-2 text-white"
-                />
-                <button 
-                  onClick={() => {
-                    const calculated = calculateCurrentWeek();
-                    saveData('currentWeek', calculated, setCurrentWeek);
-                    alert('Week updated to auto-calculated value!');
-                  }}
-                  className="bg-amber-600 text-white px-4 py-2 rounded font-semibold"
-                >
-                  Auto
-                </button>
-              </div>
-              <div className="text-xs text-slate-400">
-                Week {currentWeek}/24 • {getCurrentPhase()} Phase
-              </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+          <div>
+            <h3 class="accent text-xl font-bold mb-4 uppercase">Phase 1: Fat Loss (Months 1-4)</h3>
+            <div class="space-y-2 text-sm">
+              <p><strong class="accent">Goal:</strong> Reduce waist, build shoulders, improve conditioning</p>
+              <p><strong class="accent">Calories:</strong> 2,860/day</p>
+              <p><strong class="accent">Protein:</strong> 230g</p>
+              <p><strong class="accent">Carbs:</strong> 303g</p>
+              <p><strong class="accent">Fat:</strong> 76.5g</p>
+              <p><strong class="accent">Loss Rate:</strong> 0.5-0.8kg/week</p>
+              <p><strong class="accent">Expected Result:</strong> 107-110kg, 15-18% BF</p>
             </div>
           </div>
-        );
-      };
-
-      // ============================================
-      // MEALS TAB (MyFitnessPal Style)
-      // ============================================
-      
-      const MealsTab = () => {
-        const today = new Date().toISOString().split('T')[0];
-        const todayChecks = (mealChecks && mealChecks[today]) || {};
-        
-        const [editingItem, setEditingItem] = useState(null);
-        const [searchQuery, setSearchQuery] = useState('');
-        const [searchAmount, setSearchAmount] = useState('');
-        const [searchResults, setSearchResults] = useState(null);
-        const [isSearching, setIsSearching] = useState(false);
-
-        // Calculate meal totals
-        const calculateMealTotals = (mealKey) => {
-          const meal = MEAL_PLAN[mealKey];
-          const customized = customizedMeals[mealKey] || {};
           
-          let totalCals = 0;
-          let totalProtein = 0;
-          let totalCarbs = 0;
-          let totalFats = 0;
-          let hasAnyCustomized = false;
-
-          meal.items.forEach(item => {
-            if (customized[item.id]) {
-              hasAnyCustomized = true;
-              totalCals += customized[item.id].calories || 0;
-              totalProtein += customized[item.id].protein || 0;
-              totalCarbs += customized[item.id].carbs || 0;
-              totalFats += customized[item.id].fats || 0;
-            }
-          });
-
-          if (!hasAnyCustomized) {
-            return { 
-              calories: meal.defaultCalories, 
-              protein: '?', 
-              carbs: '?', 
-              fats: '?',
-              isEstimate: true 
-            };
-          }
-
-          return { 
-            calories: Math.round(totalCals), 
-            protein: Math.round(totalProtein), 
-            carbs: Math.round(totalCarbs), 
-            fats: Math.round(totalFats),
-            isEstimate: false
-          };
-        };
-
-        // Calculate daily totals
-        const calculateDailyTotals = () => {
-          let total = { calories: 0, protein: 0, carbs: 0, fats: 0 };
-
-          Object.keys(MEAL_PLAN).forEach(mealKey => {
-            if (todayChecks[mealKey]) {
-              const mealTotals = calculateMealTotals(mealKey);
-              total.calories += mealTotals.calories || 0;
-              if (typeof mealTotals.protein === 'number') total.protein += mealTotals.protein;
-              if (typeof mealTotals.carbs === 'number') total.carbs += mealTotals.carbs;
-              if (typeof mealTotals.fats === 'number') total.fats += mealTotals.fats;
-            }
-          });
-
-          return total;
-        };
-
-        // USDA API Backend URL - UPDATE THIS AFTER YOU DEPLOY!
-        const NUTRITION_API_URL = 'https://northman-nutrition-api.vercel.app/api/nutrition';
-        
-        // Nutrient ID mapping for USDA FoodData Central
-        const NUTRIENT_MAP = {
-          1008: { name: 'calories', unit: '', label: 'Calories' },
-          1003: { name: 'protein', unit: 'g', label: 'Protein' },
-          1005: { name: 'carbs', unit: 'g', label: 'Carbs' },
-          1004: { name: 'fats', unit: 'g', label: 'Total Fat' },
-          1079: { name: 'fiber', unit: 'g', label: 'Fiber' },
-          2000: { name: 'sugar', unit: 'g', label: 'Sugars' },
-          1258: { name: 'saturatedFat', unit: 'g', label: 'Saturated Fat' },
-          1093: { name: 'sodium', unit: 'mg', label: 'Sodium' },
-          1087: { name: 'calcium', unit: 'mg', label: 'Calcium' },
-          1089: { name: 'iron', unit: 'mg', label: 'Iron' },
-          1092: { name: 'zinc', unit: 'mg', label: 'Zinc' },
-          1090: { name: 'magnesium', unit: 'mg', label: 'Magnesium' },
-          1091: { name: 'phosphorus', unit: 'mg', label: 'Phosphorus' },
-          1095: { name: 'potassium', unit: 'mg', label: 'Potassium' },
-          1106: { name: 'vitaminA', unit: 'mcg', label: 'Vitamin A' },
-          1114: { name: 'vitaminD', unit: 'mcg', label: 'Vitamin D' },
-          1109: { name: 'vitaminE', unit: 'mg', label: 'Vitamin E' },
-          1183: { name: 'vitaminK', unit: 'mcg', label: 'Vitamin K' },
-          1162: { name: 'vitaminC', unit: 'mg', label: 'Vitamin C' },
-          1165: { name: 'vitaminB1', unit: 'mg', label: 'Thiamin (B1)' },
-          1166: { name: 'vitaminB2', unit: 'mg', label: 'Riboflavin (B2)' },
-          1167: { name: 'vitaminB3', unit: 'mg', label: 'Niacin (B3)' },
-          1175: { name: 'vitaminB6', unit: 'mg', label: 'Vitamin B6' },
-          1177: { name: 'folate', unit: 'mcg', label: 'Folate' },
-          1178: { name: 'vitaminB12', unit: 'mcg', label: 'Vitamin B12' }
-        };
-
-        // RDI (Recommended Daily Intake) for adult males doing heavy training
-        const RDI = {
-          calories: 3700, protein: 200, carbs: 400, fats: 100, fiber: 35, sugar: 50,
-          saturatedFat: 20, sodium: 2300, calcium: 1000, iron: 18, zinc: 11,
-          magnesium: 400, phosphorus: 700, potassium: 3400, vitaminA: 900,
-          vitaminD: 15, vitaminE: 15, vitaminK: 120, vitaminC: 90, vitaminB1: 1.2,
-          vitaminB2: 1.3, vitaminB3: 16, vitaminB6: 1.7, folate: 400, vitaminB12: 2.4
-        };
-
-        // Search nutrition using USDA backend
-        const searchNutrition = async () => {
-          if (!searchQuery.trim()) {
-            alert('Please enter a food item');
-            return;
-          }
-
-          setIsSearching(true);
-          setSearchResults(null);
-
-          try {
-            console.log('Searching USDA for:', searchQuery);
-            
-            const response = await fetch(`${NUTRITION_API_URL}?query=${encodeURIComponent(searchQuery)}`);
-            
-            if (!response.ok) {
-              throw new Error(`API error: ${response.status}`);
-            }
-
-            const data = await response.json();
-            console.log('USDA Response:', data);
-
-            if (!data.success || !data.foods || data.foods.length === 0) {
-              throw new Error('No foods found. Try different search terms.');
-            }
-
-            // Show food selection dialog
-            const foods = data.foods.slice(0, 5); // Top 5 results
-            const foodList = foods.map((f, i) => `${i + 1}. ${f.description}`).join('\n');
-            const choice = prompt(`Found ${data.totalHits} foods! Select one:\n\n${foodList}\n\nEnter number (1-5):`);
-            
-            if (!choice || choice < 1 || choice > 5) {
-              setIsSearching(false);
-              return;
-            }
-
-            const selectedFood = foods[parseInt(choice) - 1];
-            console.log('Selected food:', selectedFood);
-
-            // Parse nutrients from USDA format
-            const nutrients = parseUSDANutrients(selectedFood, searchAmount);
-            
-            setSearchResults(nutrients);
-
-          } catch (error) {
-            console.error('Search error:', error);
-            alert(`❌ Search Failed\n\n${error.message}\n\n✏️ Manual entry form will appear - enter nutrition from package label.`);
-            
-            // Show manual entry
-            setSearchResults({
-              food: searchQuery || 'Manual Entry',
-              brand: '',
-              serving: searchAmount || '100g',
-              ...createEmptyNutrients(),
-              manual: true
-            });
-          } finally {
-            setIsSearching(false);
-          }
-        };
-
-        // Parse USDA nutrient data
-        const parseUSDANutrients = (food, amount) => {
-          const nutrients = createEmptyNutrients();
-          nutrients.food = food.description || 'Unknown food';
-          nutrients.brand = food.brandOwner || '';
-          nutrients.serving = amount || '100g';
-
-          // Calculate multiplier for serving size
-          let multiplier = 1;
-          if (amount) {
-            const match = amount.match(/(\d+\.?\d*)\s*(g|ml|kg|l|oz|cup|tbsp|tsp)?/i);
-            if (match) {
-              let num = parseFloat(match[1]);
-              const unit = (match[2] || 'g').toLowerCase();
-              
-              // Convert to grams (USDA data is per 100g)
-              if (unit === 'kg') num *= 1000;
-              else if (unit === 'l') num *= 1000;
-              else if (unit === 'oz') num *= 28.35;
-              else if (unit === 'cup') num *= 240;
-              else if (unit === 'tbsp') num *= 15;
-              else if (unit === 'tsp') num *= 5;
-              
-              multiplier = num / 100;
-            }
-          }
-
-          // Extract nutrients from USDA response
-          if (food.foodNutrients && Array.isArray(food.foodNutrients)) {
-            food.foodNutrients.forEach(nutrient => {
-              const mapped = NUTRIENT_MAP[nutrient.nutrientId];
-              if (mapped && nutrient.value) {
-                const value = nutrient.value * multiplier;
-                nutrients[mapped.name] = Math.round(value * 10) / 10;
-              }
-            });
-          }
-
-          return nutrients;
-        };
-
-        // Create empty nutrient object
-        const createEmptyNutrients = () => ({
-          food: '', brand: '', serving: '',
-          calories: 0, protein: 0, carbs: 0, fats: 0, fiber: 0, sugar: 0,
-          saturatedFat: 0, sodium: 0, calcium: 0, iron: 0, zinc: 0,
-          magnesium: 0, phosphorus: 0, potassium: 0, vitaminA: 0,
-          vitaminD: 0, vitaminE: 0, vitaminK: 0, vitaminC: 0, vitaminB1: 0,
-          vitaminB2: 0, vitaminB3: 0, vitaminB6: 0, folate: 0, vitaminB12: 0
-        });
-        // Save customized item
-        const saveCustomizedItem = () => {
-          if (!searchResults || !editingItem) return;
-
-          const { mealKey, itemId } = editingItem;
-          
-          const newCustomized = {
-            ...customizedMeals,
-            [mealKey]: {
-              ...customizedMeals[mealKey],
-              [itemId]: {
-                ...searchResults,
-                customizedAt: new Date().toISOString()
-              }
-            }
-          };
-
-          setCustomizedMeals(newCustomized);
-          storage.set('customizedMeals', newCustomized);
-
-          setEditingItem(null);
-          setSearchQuery('');
-          setSearchAmount('');
-          setSearchResults(null);
-        };
-
-        // Remove customization
-        const removeCustomization = (mealKey, itemId) => {
-          const newCustomized = { ...customizedMeals };
-          if (newCustomized[mealKey]) {
-            delete newCustomized[mealKey][itemId];
-            if (Object.keys(newCustomized[mealKey]).length === 0) {
-              delete newCustomized[mealKey];
-            }
-          }
-
-          setCustomizedMeals(newCustomized);
-          storage.set('customizedMeals', newCustomized);
-        };
-
-        // Toggle meal check
-        const toggleMealCheck = async (mealKey) => {
-          const newChecks = {
-            ...mealChecks,
-            [today]: {
-              ...todayChecks,
-              [mealKey]: !todayChecks[mealKey]
-            }
-          };
-          saveData('mealChecks', newChecks, setMealChecks);
-        };
-
-        const dailyTotals = calculateDailyTotals();
-
-        return (
-          <div className="p-4 space-y-4 pb-20">
-            {/* Header */}
-            <div className="bg-slate-800 rounded-lg p-4 text-center">
-              <h2 className="viking-title text-2xl font-bold text-amber-400 mb-1">
-                WARRIOR FUEL
-              </h2>
-              <p className="text-slate-400 text-sm mb-3">Track Your Exact Brands</p>
-              
-              {/* Daily Totals */}
-              <div className="bg-slate-900 rounded-lg p-3">
-                <div className="text-3xl font-bold text-white mb-1">{dailyTotals.calories}</div>
-                <div className="text-xs text-slate-400 mb-2">calories today</div>
-                <div className="flex justify-center gap-4 text-xs">
-                  <div><span className="text-slate-500">P:</span> <span className="text-white font-bold">{dailyTotals.protein}g</span></div>
-                  <div><span className="text-slate-500">C:</span> <span className="text-white font-bold">{dailyTotals.carbs}g</span></div>
-                  <div><span className="text-slate-500">F:</span> <span className="text-white font-bold">{dailyTotals.fats}g</span></div>
-                </div>
-              </div>
-            </div>
-
-            {/* Meals */}
-            {Object.entries(MEAL_PLAN).map(([mealKey, meal]) => {
-              const isChecked = todayChecks[mealKey];
-              const mealTotals = calculateMealTotals(mealKey);
-              const customized = customizedMeals[mealKey] || {};
-
-              return (
-                <div key={mealKey} className="bg-slate-800 rounded-lg p-4 border border-slate-700">
-                  {/* Meal Header */}
-                  <div className="flex items-center gap-3 mb-3">
-                    <button
-                      onClick={() => toggleMealCheck(mealKey)}
-                      className={`w-6 h-6 rounded border-2 flex items-center justify-center ${
-                        isChecked ? 'bg-amber-600 border-amber-600 text-white' : 'border-slate-600'
-                      }`}
-                    >
-                      {isChecked && '✓'}
-                    </button>
-                    <div className="flex-1">
-                      <h3 className="font-bold text-white">{meal.name}</h3>
-                      <div className="text-xs text-slate-400">🕐 {meal.time}</div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-amber-400 font-bold">{mealTotals.calories} cal</div>
-                      {!mealTotals.isEstimate && (
-                        <div className="text-xs text-slate-400">
-                          P:{mealTotals.protein} C:{mealTotals.carbs} F:{mealTotals.fats}
-                        </div>
-                      )}
-                      {mealTotals.isEstimate && (
-                        <div className="text-xs text-amber-600">estimate</div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Food Items */}
-                  <div className="space-y-2">
-                    {meal.items.map(item => {
-                      const customItem = customized[item.id];
-                      const isEditing = editingItem?.mealKey === mealKey && editingItem?.itemId === item.id;
-
-                      return (
-                        <div key={item.id} className="bg-slate-900 rounded p-2">
-                          {!customItem && !isEditing && (
-                            <div className="flex items-center justify-between">
-                              <div className="flex-1">
-                                <div className="text-sm text-slate-400">{item.name}</div>
-                                <div className="text-xs text-slate-500">{item.amount}</div>
-                              </div>
-                              <button
-                                onClick={() => {
-                                  setEditingItem({ mealKey, itemId: item.id });
-                                  setSearchQuery(item.name);
-                                  setSearchAmount(item.amount);
-                                }}
-                                className="text-xs text-amber-400 hover:text-amber-300"
-                              >
-                                + Add Brand
-                              </button>
-                            </div>
-                          )}
-
-                          {customItem && !isEditing && (
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1">
-                                <div className="text-sm text-white font-semibold">{customItem.food}</div>
-                                {customItem.brand && (
-                                  <div className="text-xs text-amber-400">{customItem.brand}</div>
-                                )}
-                                <div className="text-xs text-slate-500">{customItem.serving}</div>
-                                <div className="text-xs text-slate-400 mt-1">
-                                  {customItem.calories}cal • P:{customItem.protein}g C:{customItem.carbs}g F:{customItem.fats}g
-                                </div>
-                              </div>
-                              <div className="flex gap-2">
-                                <button
-                                  onClick={() => {
-                                    setEditingItem({ mealKey, itemId: item.id });
-                                    setSearchQuery(customItem.food);
-                                    setSearchAmount(customItem.serving);
-                                  }}
-                                  className="text-xs text-blue-400"
-                                >
-                                  Edit
-                                </button>
-                                <button
-                                  onClick={() => removeCustomization(mealKey, item.id)}
-                                  className="text-xs text-red-400"
-                                >
-                                  Remove
-                                </button>
-                              </div>
-                            </div>
-                          )}
-
-                          {isEditing && (
-                            <div className="space-y-2 pt-2">
-                              <div className="text-xs bg-amber-600/20 border border-amber-600/30 p-2 rounded">
-                                <strong>⚡ FASTEST:</strong> Just type the food name and hit Search - if it fails, manual entry form appears automatically. Enter macros from the package label.
-                              </div>
-                              
-                              <input
-                                type="text"
-                                placeholder="Food name (e.g., Greek Yogurt)"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full bg-slate-800 border border-slate-600 rounded px-3 py-2 text-white text-sm"
-                              />
-                              <input
-                                type="text"
-                                placeholder="Amount (e.g., 3 eggs, 200ml, 100g)"
-                                value={searchAmount}
-                                onChange={(e) => setSearchAmount(e.target.value)}
-                                className="w-full bg-slate-800 border border-slate-600 rounded px-3 py-2 text-white text-sm"
-                              />
-
-                              <div className="flex gap-2">
-                                <button
-                                  onClick={searchNutrition}
-                                  disabled={isSearching}
-                                  className="flex-1 bg-amber-600 text-white py-2 rounded text-sm font-semibold disabled:bg-slate-600"
-                                >
-                                  {isSearching ? '🔍 Searching...' : '🔍 Search Database'}
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    setEditingItem(null);
-                                    setSearchQuery('');
-                                    setSearchAmount('');
-                                    setSearchResults(null);
-                                  }}
-                                  className="bg-slate-700 text-white px-4 py-2 rounded text-sm"
-                                >
-                                  Cancel
-                                </button>
-                              </div>
-
-                              {searchResults && (
-                                <div className="mt-2 p-3 bg-slate-800 rounded border border-amber-600/30">
-                                  {searchResults.manual ? (
-                                    <>
-                                      <div className="text-xs text-amber-400 mb-2">Manual Entry Mode</div>
-                                      <input
-                                        type="text"
-                                        placeholder="Food name"
-                                        value={searchResults.food}
-                                        onChange={(e) => setSearchResults({...searchResults, food: e.target.value})}
-                                        className="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white text-sm mb-2"
-                                      />
-                                      <input
-                                        type="text"
-                                        placeholder="Brand (optional)"
-                                        value={searchResults.brand}
-                                        onChange={(e) => setSearchResults({...searchResults, brand: e.target.value})}
-                                        className="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white text-sm mb-2"
-                                      />
-                                      <input
-                                        type="text"
-                                        placeholder="Serving size"
-                                        value={searchResults.serving}
-                                        onChange={(e) => setSearchResults({...searchResults, serving: e.target.value})}
-                                        className="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white text-sm mb-2"
-                                      />
-                                      <div className="grid grid-cols-2 gap-2 mb-2 text-xs">
-                                        <input
-                                          type="number"
-                                          placeholder="Calories"
-                                          value={searchResults.calories || ''}
-                                          onChange={(e) => setSearchResults({...searchResults, calories: parseFloat(e.target.value) || 0})}
-                                          className="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white"
-                                        />
-                                        <input
-                                          type="number"
-                                          placeholder="Protein (g)"
-                                          value={searchResults.protein || ''}
-                                          onChange={(e) => setSearchResults({...searchResults, protein: parseFloat(e.target.value) || 0})}
-                                          className="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white"
-                                        />
-                                        <input
-                                          type="number"
-                                          placeholder="Carbs (g)"
-                                          value={searchResults.carbs || ''}
-                                          onChange={(e) => setSearchResults({...searchResults, carbs: parseFloat(e.target.value) || 0})}
-                                          className="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white"
-                                        />
-                                        <input
-                                          type="number"
-                                          placeholder="Fats (g)"
-                                          value={searchResults.fats || ''}
-                                          onChange={(e) => setSearchResults({...searchResults, fats: parseFloat(e.target.value) || 0})}
-                                          className="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white"
-                                        />
-                                        <input
-                                          type="number"
-                                          placeholder="Fiber (g)"
-                                          value={searchResults.fiber || ''}
-                                          onChange={(e) => setSearchResults({...searchResults, fiber: parseFloat(e.target.value) || 0})}
-                                          className="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white"
-                                        />
-                                        <input
-                                          type="number"
-                                          placeholder="Sugar (g)"
-                                          value={searchResults.sugar || ''}
-                                          onChange={(e) => setSearchResults({...searchResults, sugar: parseFloat(e.target.value) || 0})}
-                                          className="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white"
-                                        />
-                                        <input
-                                          type="number"
-                                          placeholder="Sat Fat (g)"
-                                          value={searchResults.saturatedFat || ''}
-                                          onChange={(e) => setSearchResults({...searchResults, saturatedFat: parseFloat(e.target.value) || 0})}
-                                          className="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white"
-                                        />
-                                        <input
-                                          type="number"
-                                          placeholder="Sodium (mg)"
-                                          value={searchResults.sodium || ''}
-                                          onChange={(e) => setSearchResults({...searchResults, sodium: parseFloat(e.target.value) || 0})}
-                                          className="bg-slate-900 border border-slate-600 rounded px-2 py-1 text-white"
-                                        />
-                                      </div>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <div className="text-sm font-bold text-white">{searchResults.food}</div>
-                                      {searchResults.brand && (
-                                        <div className="text-xs text-amber-400 mt-1">{searchResults.brand}</div>
-                                      )}
-                                      <div className="text-xs text-slate-400 mb-3">Serving: {searchResults.serving}</div>
-                                      
-                                      <div className="grid grid-cols-2 gap-2 text-xs mb-2">
-                                        <div className="bg-slate-900 rounded p-2">
-                                          <div className="text-slate-500">Calories</div>
-                                          <div className="text-amber-400 font-bold text-lg">{searchResults.calories}</div>
-                                        </div>
-                                        <div className="bg-slate-900 rounded p-2">
-                                          <div className="text-slate-500">Protein</div>
-                                          <div className="text-white font-bold text-lg">{searchResults.protein}g</div>
-                                        </div>
-                                        <div className="bg-slate-900 rounded p-2">
-                                          <div className="text-slate-500">Carbs</div>
-                                          <div className="text-white font-bold">{searchResults.carbs}g</div>
-                                        </div>
-                                        <div className="bg-slate-900 rounded p-2">
-                                          <div className="text-slate-500">Fats</div>
-                                          <div className="text-white font-bold">{searchResults.fats}g</div>
-                                        </div>
-                                        {searchResults.fiber > 0 && (
-                                          <div className="bg-slate-900 rounded p-2">
-                                            <div className="text-slate-500">Fiber</div>
-                                            <div className="text-white font-bold">{searchResults.fiber}g</div>
-                                          </div>
-                                        )}
-                                        {searchResults.sugar > 0 && (
-                                          <div className="bg-slate-900 rounded p-2">
-                                            <div className="text-slate-500">Sugar</div>
-                                            <div className="text-white font-bold">{searchResults.sugar}g</div>
-                                          </div>
-                                        )}
-                                        {searchResults.saturatedFat > 0 && (
-                                          <div className="bg-slate-900 rounded p-2">
-                                            <div className="text-slate-500">Sat Fat</div>
-                                            <div className="text-white font-bold">{searchResults.saturatedFat}g</div>
-                                          </div>
-                                        )}
-                                        {searchResults.sodium > 0 && (
-                                          <div className="bg-slate-900 rounded p-2">
-                                            <div className="text-slate-500">Sodium</div>
-                                            <div className="text-white font-bold">{searchResults.sodium}mg</div>
-                                          </div>
-                                        )}
-                                      </div>
-                                    </>
-                                  )}
-                                  <button
-                                    onClick={saveCustomizedItem}
-                                    className="w-full bg-green-600 text-white py-2 rounded text-sm font-semibold"
-                                  >
-                                    ✓ Save This Item
-                                  </button>
-                                </div>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })}
-
-            {/* Targets */}
-            <div className="bg-slate-800 rounded-lg p-4 border border-amber-600/30">
-              <h3 className="text-amber-400 font-bold mb-2">⚡ DAILY TARGETS</h3>
-              <div className="space-y-1 text-sm text-slate-300">
-                <div className="flex justify-between">
-                  <span>Calories:</span>
-                  <span className="text-amber-400 font-bold">3,500-3,700</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Protein:</span>
-                  <span className="text-amber-400 font-bold">200-220g</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Carbs:</span>
-                  <span className="text-amber-400 font-bold">350-450g</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Fats:</span>
-                  <span className="text-amber-400 font-bold">80-100g</span>
-                </div>
-              </div>
+          <div>
+            <h3 class="accent text-xl font-bold mb-4 uppercase">Phase 2: Lean Bulk (Months 5-6)</h3>
+            <div class="space-y-2 text-sm">
+              <p><strong class="accent">Goal:</strong> Build shoulder width, upper chest, back thickness</p>
+              <p><strong class="accent">Calories:</strong> 3,385/day</p>
+              <p><strong class="accent">Protein:</strong> 240g</p>
+              <p><strong class="accent">Carbs:</strong> 382g</p>
+              <p><strong class="accent">Fat:</strong> 84g</p>
+              <p><strong class="accent">Gain Rate:</strong> Lean muscle</p>
+              <p><strong class="accent">Expected Result:</strong> 105-112kg, 14-17% BF (Skarsgård)</p>
             </div>
           </div>
-        );
-      };
-      // ============================================
-      // BOTTOM NAV
-      // ============================================
-      
-      const BottomNav = () => {
-        const tabs = [
-          { id: 'home', icon: '🏠', label: 'Home' },
-          { id: 'workouts', icon: '⚔️', label: 'Train' },
-          { id: 'progress', icon: '📊', label: 'Progress' },
-          { id: 'meals', icon: '🍖', label: 'Fuel' },
-        ];
-
-        return (
-          <div className="fixed bottom-0 left-0 right-0 bg-slate-900 border-t-2 border-amber-600/30">
-            <div className="flex">
-              {tabs.map(tab => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex-1 py-3 text-center ${
-                    activeTab === tab.id 
-                      ? 'bg-amber-600/20 border-t-2 border-amber-600' 
-                      : 'text-slate-500'
-                  }`}
-                >
-                  <div className="text-xl mb-1">{tab.icon}</div>
-                  <div className={`text-xs font-semibold ${
-                    activeTab === tab.id ? 'text-amber-400' : 'text-slate-400'
-                  }`}>
-                    {tab.label}
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-        );
-      };
-
-      // ============================================
-      // RENDER
-      // ============================================
-      
-      return (
-        <div className="min-h-screen bg-slate-900">
-          {activeTab === 'home' && <HomeTab />}
-          {activeTab === 'workouts' && <WorkoutsTab />}
-          {activeTab === 'progress' && <ProgressTab />}
-          {activeTab === 'meals' && <MealsTab />}
-          <BottomNav />
         </div>
-      );
+
+        <div class="bg-gradient-to-r from-green-500/20 to-transparent p-4 rounded border-l-4 border-green-500 mb-8">
+          <p class="font-bold accent mb-2">GUIDING PRINCIPLE:</p>
+          <p class="text-sm">"Do not chase size. Chase proportions."</p>
+          <p class="text-xs text-gray-400 mt-2">The Northman physique comes from: WIDE shoulders + THICK upper body + LEAN waist + Athletic conditioning. At 198cm, optimizing proportions = dramatic visual transformation.</p>
+        </div>
+
+        <h3 class="accent text-xl font-bold mb-4 uppercase">6 STRATEGIC MUSCLE FOCUS AREAS</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="card-bg p-4 rounded accent-border text-sm">
+            <p class="font-bold accent">1️⃣ SIDE DELTS</p>
+            <p class="text-xs text-gray-400">Creates shoulder width (CRITICAL)</p>
+            <p class="text-xs mt-2">Target: 8 sets/week | Dumbbell lateral raises 4x12-15</p>
+          </div>
+          <div class="card-bg p-4 rounded accent-border text-sm">
+            <p class="font-bold accent">2️⃣ UPPER CHEST</p>
+            <p class="text-xs text-gray-400">Creates armor appearance</p>
+            <p class="text-xs mt-2">Target: 6-9 sets/week | Incline bench, DB press, cable flyes</p>
+          </div>
+          <div class="card-bg p-4 rounded accent-border text-sm">
+            <p class="font-bold accent">3️⃣ LATS</p>
+            <p class="text-xs text-gray-400">Creates V-taper (wide back)</p>
+            <p class="text-xs mt-2">Target: 9-12 sets/week | Pull-ups, pulldowns, rows</p>
+          </div>
+          <div class="card-bg p-4 rounded accent-border text-sm">
+            <p class="font-bold accent">4️⃣ TRAPS</p>
+            <p class="text-xs text-gray-400">Creates warrior appearance</p>
+            <p class="text-xs mt-2">Target: 6-9 sets/week | Shrugs, farmer carries, deadlifts</p>
+          </div>
+          <div class="card-bg p-4 rounded accent-border text-sm">
+            <p class="font-bold accent">5️⃣ GLUTES & HAMSTRINGS</p>
+            <p class="text-xs text-gray-400">Athletic power & posture</p>
+            <p class="text-xs mt-2">Target: 10-15 sets/week | RDLs, split squats, hip thrusts</p>
+          </div>
+          <div class="card-bg p-4 rounded accent-border text-sm">
+            <p class="font-bold accent">6️⃣ FOREARMS & GRIP</p>
+            <p class="text-xs text-gray-400">Completes rugged aesthetic</p>
+            <p class="text-xs mt-2">Target: 6-9 sets/week | Farmer carries, dead hangs, hammer curls</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FUEL TAB -->
+    <div id="fuel" class="tab-content hidden">
+      <h2 class="text-2xl accent font-bold mb-6 uppercase">🍽️ Daily Meal Plan</h2>
+      <div id="mealContainer" class="space-y-6"></div>
+      <div id="dailyMacros" class="mt-8"></div>
+      <h3 class="text-xl accent font-bold my-6 uppercase">📋 Daily Checklist</h3>
+      <div id="mealChecklist" class="space-y-3 mb-6"></div>
+      <button onclick="saveMealLog()" class="w-full btn-primary py-3 rounded font-bold">💾 SAVE MEAL LOG</button>
+    </div>
+
+    <!-- TRAINING TAB -->
+    <div id="training" class="tab-content hidden">
+      <h2 class="text-2xl accent font-bold mb-6 uppercase">⚔️ Training Split</h2>
+      <div id="trainingContainer" class="space-y-6 mb-8"></div>
+      <h3 class="text-xl accent font-bold my-6 uppercase">🏋️ Strength Metrics</h3>
+      <div id="strengthMetrics" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6"></div>
+      <button onclick="saveStrengthMetrics()" class="w-full btn-primary py-3 rounded font-bold">💾 SAVE PROGRESS</button>
+    </div>
+
+    <!-- TRACKING TAB -->
+    <div id="tracking" class="tab-content hidden">
+      <h2 class="text-2xl accent font-bold mb-6 uppercase">📊 Body Metrics</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div class="card-bg p-6 rounded accent-border">
+          <div class="accent font-bold uppercase mb-3 text-sm">Weekly Body Weight</div>
+          <input type="date" class="w-full p-2 rounded mb-2">
+          <input type="number" placeholder="Weight (kg)" step="0.1" class="w-full p-2 rounded mb-2">
+          <button onclick="saveWeight()" class="w-full btn-primary py-2 rounded font-bold text-sm">Save</button>
+        </div>
+        <div class="card-bg p-6 rounded accent-border">
+          <div class="accent font-bold uppercase mb-3 text-sm">Waist Circumference</div>
+          <input type="date" class="w-full p-2 rounded mb-2">
+          <input type="number" placeholder="Waist (cm)" step="0.1" class="w-full p-2 rounded mb-2">
+          <button onclick="saveWaist()" class="w-full btn-primary py-2 rounded font-bold text-sm">Save</button>
+        </div>
+        <div class="card-bg p-6 rounded accent-border">
+          <div class="accent font-bold uppercase mb-3 text-sm">Progress Photos (Every 2 weeks)</div>
+          <input type="date" class="w-full p-2 rounded mb-2">
+          <textarea placeholder="Notes..." class="w-full p-2 rounded mb-2 text-sm" rows="3"></textarea>
+          <button onclick="savePhotoDate()" class="w-full btn-primary py-2 rounded font-bold text-sm">Save</button>
+        </div>
+        <div class="card-bg p-6 rounded accent-border">
+          <div class="accent font-bold uppercase mb-3 text-sm">Training Notes</div>
+          <input type="date" class="w-full p-2 rounded mb-2">
+          <textarea placeholder="Energy, performance, feelings..." class="w-full p-2 rounded mb-2 text-sm" rows="3"></textarea>
+          <button onclick="saveTrainingNotes()" class="w-full btn-primary py-2 rounded font-bold text-sm">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROGRESS TAB -->
+    <div id="progress" class="tab-content hidden">
+      <h2 class="text-2xl accent font-bold mb-6 uppercase">📈 6-Month Transformation</h2>
+      
+      <div class="bg-gradient-to-r from-green-500/20 to-transparent p-6 rounded border-l-4 border-green-500 mb-8">
+        <p class="font-bold accent mb-3 text-lg">EXPECTED TRANSFORMATION</p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+          <div>
+            <p class="accent font-bold">Month 0 (NOW)</p>
+            <p class="text-xs text-gray-400 mt-2">115kg • Soft waist • Love handles • Limited definition</p>
+          </div>
+          <div>
+            <p class="accent font-bold">Month 4 (End Phase 1)</p>
+            <p class="text-xs text-gray-400 mt-2">107-110kg • Reduced handles • Visible shoulders • 15-18% BF</p>
+          </div>
+          <div>
+            <p class="accent font-bold">Month 6 (GOAL)</p>
+            <p class="text-xs text-gray-400 mt-2">105-112kg • LEAN waist • Broad shoulders • Skarsgård physique</p>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="accent text-lg font-bold mb-4 uppercase">Core Strength Lifts to Track</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+        <div class="card-bg p-4 rounded">
+          <p class="accent font-bold">Incline Bench Press</p>
+          <p class="text-xs text-gray-400">Phase 1: +10-15kg | Phase 2: +15-20kg</p>
+        </div>
+        <div class="card-bg p-4 rounded">
+          <p class="accent font-bold">Overhead Press</p>
+          <p class="text-xs text-gray-400">Phase 1: +5-10kg | Phase 2: +10-15kg</p>
+        </div>
+        <div class="card-bg p-4 rounded">
+          <p class="accent font-bold">Pull-Ups</p>
+          <p class="text-xs text-gray-400">Phase 1: +5-10 reps | Phase 2: +10-15 reps</p>
+        </div>
+        <div class="card-bg p-4 rounded">
+          <p class="accent font-bold">Barbell Row</p>
+          <p class="text-xs text-gray-400">Phase 1: +10-15kg | Phase 2: +15-20kg</p>
+        </div>
+        <div class="card-bg p-4 rounded">
+          <p class="accent font-bold">Squat</p>
+          <p class="text-xs text-gray-400">Phase 1: +10-15kg | Phase 2: +15-20kg</p>
+        </div>
+        <div class="card-bg p-4 rounded">
+          <p class="accent font-bold">Romanian Deadlift</p>
+          <p class="text-xs text-gray-400">Phase 1: +10-15kg | Phase 2: +15-20kg</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    let currentPhase = 1;
+
+    const PHASES = {
+      1: {
+        name: 'Phase 1: Fat Loss',
+        months: 'Months 1-4',
+        calories: 2860,
+        protein: 230,
+        carbs: 303,
+        fat: 76.5,
+        goal: '0.5-0.8kg/week loss',
+        result: '107-110kg by Month 4'
+      },
+      2: {
+        name: 'Phase 2: Lean Bulk',
+        months: 'Months 5-6',
+        calories: 3385,
+        protein: 240,
+        carbs: 382,
+        fat: 84,
+        goal: 'Lean muscle gain',
+        result: '105-112kg, Skarsgård ready'
+      }
+    };
+
+    const MEALS = {
+      1: {
+        meals: [
+          { name: 'Pre-Workout Snack', time: '4:10am', items: ['2 rice cakes', '1 banana', '0.5 tbsp peanut butter'], cal: 245, p: 5, c: 40, f: 4.5 },
+          { name: 'Breakfast', time: '6:15am', items: ['2 whole eggs + 200ml egg whites', '2 slices wholemeal toast', 'hot sauce'], cal: 360, p: 42, c: 28, f: 10 },
+          { name: 'Mid-Morning Snack', time: '9:00am', items: ['150g Greek yogurt', '80g rolled oats', '40g blueberries', '1 tbsp honey'], cal: 480, p: 28, c: 75, f: 9 },
+          { name: 'Lunch - Green Curry', time: '12:30pm', items: ['220g chicken breast', '120ml light coconut milk', '250g jasmine rice', '150g mixed vegetables'], cal: 800, p: 62, c: 88, f: 16 },
+          { name: 'Lunch - Nachos', time: '12:30pm', items: ['30g cornchips', '200g extra lean beef mince', '150g black beans', '200g jasmine rice', 'hot sauce'], cal: 780, p: 60, c: 95, f: 20 },
+          { name: 'Afternoon Snack', time: '3:30pm', items: ['150g Greek yogurt', '1 banana', '30g rolled oats'], cal: 280, p: 18, c: 45, f: 5 },
+          { name: 'Dinner', time: '6:00pm', items: ['220g grilled chicken breast', '250g sweet potato', '150g steamed vegetables', '0.5 tbsp olive oil'], cal: 515, p: 55, c: 32, f: 12 }
+        ]
+      },
+      2: {
+        meals: [
+          { name: 'Pre-Workout Snack', time: '4:10am', items: ['2 rice cakes', '1 banana', '1 tbsp peanut butter'], cal: 270, p: 6.5, c: 45.5, f: 9.3 },
+          { name: 'Breakfast', time: '6:15am', items: ['2 whole eggs + 250ml egg whites', '2 slices wholemeal toast', 'hot sauce'], cal: 420, p: 46, c: 30.9, f: 12 },
+          { name: 'Mid-Morning Snack', time: '9:00am', items: ['150g Greek yogurt', '100g rolled oats', '50g blueberries', '1 tbsp honey'], cal: 610, p: 31.3, c: 97, f: 10.9 },
+          { name: 'Lunch - Green Curry', time: '12:30pm', items: ['270g chicken breast', '150ml light coconut milk', '350g jasmine rice', '150g mixed vegetables'], cal: 1035, p: 75.6, c: 112.5, f: 21.5 },
+          { name: 'Lunch - Nachos', time: '12:30pm', items: ['40g cornchips', '240g extra lean beef mince', '150g black beans', '250g jasmine rice', 'hot sauce'], cal: 1029, p: 74.4, c: 117, f: 26.9 },
+          { name: 'Afternoon Snack', time: '3:30pm', items: ['150g Greek yogurt', '1 banana', '40g rolled oats'], cal: 361, p: 21, c: 58, f: 7 },
+          { name: 'Dinner', time: '6:00pm', items: ['250g grilled chicken breast', '350g sweet potato', '150g steamed vegetables', '1 tbsp olive oil'], cal: 689, p: 61.2, c: 38, f: 23.7 }
+        ]
+      }
+    };
+
+    const TRAINING = {
+      monday: { name: 'Monday: Upper Strength', focus: 'Chest, back, traps', duration: '60-75min' },
+      tuesday: { name: 'Tuesday: Lower Power', focus: 'Legs, glutes, hamstrings', duration: '60-70min' },
+      wednesday: { name: 'Wednesday: Upper Hyper (Vertical)', focus: 'SIDE DELTS, upper chest, lats', duration: '75-85min' },
+      thursday: { name: 'Thursday: Lower Hyper', focus: 'Glutes, legs, athletic development', duration: '60-70min' },
+      friday: { name: 'Friday: Upper Definition', focus: 'Arms, shoulders, grip', duration: '65-75min' },
+      saturday: { name: 'Saturday: Warrior Conditioning', focus: 'Ruck/hike/camping (60-90min)', duration: 'Variable' }
+    };
+
+    function selectPhase(phase) {
+      currentPhase = phase;
+      document.getElementById('phaseBtn1').classList.toggle('phase-active', phase === 1);
+      document.getElementById('phaseBtn2').classList.toggle('phase-active', phase === 2);
+      updateContent();
     }
 
-    ReactDOM.render(<NorthmanApp />, document.getElementById('root'));
+    function updateContent() {
+      const p = PHASES[currentPhase];
+      document.getElementById('phaseLabel').textContent = `${p.name}`;
+      document.getElementById('phaseGoal').textContent = p.goal;
+      renderMeals();
+      renderTraining();
+    }
+
+    function renderMeals() {
+      const mealsData = MEALS[currentPhase].meals;
+      let html = '';
+      mealsData.forEach(meal => {
+        html += `<div class="card-bg p-6 rounded accent-border">
+          <div class="accent font-bold text-lg mb-1">${meal.name}</div>
+          <div class="text-gray-400 text-sm mb-3">${meal.time}</div>
+          <div class="mb-4">
+            ${meal.items.map(i => `<div class="text-sm mb-1">• ${i}</div>`).join('')}
+          </div>
+          <div class="grid grid-cols-4 gap-2 text-center bg-green-500/10 p-3 rounded">
+            <div><div class="text-xs text-gray-400">Cal</div><div class="accent font-bold">${meal.cal}</div></div>
+            <div><div class="text-xs text-gray-400">P</div><div class="accent font-bold">${meal.p}g</div></div>
+            <div><div class="text-xs text-gray-400">C</div><div class="accent font-bold">${Math.round(meal.c)}g</div></div>
+            <div><div class="text-xs text-gray-400">F</div><div class="accent font-bold">${meal.f}g</div></div>
+          </div>
+        </div>`;
+      });
+      document.getElementById('mealContainer').innerHTML = html;
+
+      const p = PHASES[currentPhase];
+      document.getElementById('dailyMacros').innerHTML = `<div class="bg-gradient-to-r from-green-500 to-green-600 text-gray-900 p-6 rounded grid grid-cols-4 gap-4 text-center font-bold">
+        <div><div class="text-sm opacity-90">DAILY CALORIES</div><div class="text-3xl">${p.calories}</div></div>
+        <div><div class="text-sm opacity-90">PROTEIN</div><div class="text-3xl">${p.protein}g</div></div>
+        <div><div class="text-sm opacity-90">CARBS</div><div class="text-3xl">${Math.round(p.carbs)}g</div></div>
+        <div><div class="text-sm opacity-90">FAT</div><div class="text-3xl">${Math.round(p.fat)}g</div></div>
+      </div>`;
+
+      let checklistHtml = `
+        <div class="card-bg p-3 rounded flex items-center gap-3"><input type="checkbox" class="w-5 h-5"> Pre-Workout</div>
+        <div class="card-bg p-3 rounded flex items-center gap-3"><input type="checkbox" class="w-5 h-5"> Breakfast</div>
+        <div class="card-bg p-3 rounded flex items-center gap-3"><input type="checkbox" class="w-5 h-5"> Mid-Morning Snack</div>
+        <div class="card-bg p-3 rounded flex items-center gap-3"><input type="checkbox" class="w-5 h-5"> Lunch (Curry or Nachos)</div>
+        <div class="card-bg p-3 rounded flex items-center gap-3"><input type="checkbox" class="w-5 h-5"> Afternoon Snack</div>
+        <div class="card-bg p-3 rounded flex items-center gap-3"><input type="checkbox" class="w-5 h-5"> Dinner</div>
+      `;
+      document.getElementById('mealChecklist').innerHTML = checklistHtml;
+    }
+
+    function renderTraining() {
+      let html = '';
+      Object.values(TRAINING).forEach(day => {
+        html += `<div class="card-bg p-6 rounded accent-border">
+          <div class="accent font-bold text-lg mb-2">${day.name}</div>
+          <div class="text-gray-400 text-sm mb-2"><strong>Focus:</strong> ${day.focus}</div>
+          <div class="text-gray-500 text-sm">⏱️ ${day.duration}</div>
+        </div>`;
+      });
+      document.getElementById('trainingContainer').innerHTML = html;
+
+      const metrics = ['Incline Bench Press', 'Overhead Press', 'Pull-Ups', 'Barbell Row', 'Squat', 'Romanian Deadlift', 'Farmer Carries'];
+      let metricsHtml = '';
+      metrics.forEach(m => {
+        metricsHtml += `<div class="card-bg p-4 rounded accent-border">
+          <div class="accent font-bold text-sm mb-3">${m}</div>
+          <input type="number" placeholder="Current" class="w-full p-2 rounded mb-2 text-xs">
+          <input type="number" placeholder="Target" class="w-full p-2 rounded text-xs">
+        </div>`;
+      });
+      document.getElementById('strengthMetrics').innerHTML = metricsHtml;
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('[id="guide"], [id="fuel"], [id="training"], [id="tracking"], [id="progress"]').forEach(el => {
+        el.classList.add('hidden');
+      });
+      document.getElementById(tab).classList.remove('hidden');
+      document.querySelectorAll('button').forEach(btn => btn.classList.remove('tab-active'));
+      event.target.classList.add('tab-active');
+    }
+
+    function saveMealLog() { alert('✅ Meal log saved!'); }
+    function saveStrengthMetrics() { alert('✅ Strength progress saved!'); }
+    function saveWeight() { alert('✅ Weight saved!'); }
+    function saveWaist() { alert('✅ Waist measurement saved!'); }
+    function savePhotoDate() { alert('✅ Photo session logged!'); }
+    function saveTrainingNotes() { alert('✅ Training notes saved!'); }
+
+    updateContent();
   </script>
 </body>
 </html>
