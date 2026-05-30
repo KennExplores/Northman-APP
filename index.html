@@ -1299,11 +1299,15 @@
             ? (lunchChoice === 'curry' ? 'lunchCurry' : 'lunchNachos')
             : mealKey;
           
+          // Get fresh state from current mealChecks, not stale todayChecks
+          const currentDayChecks = mealChecks[today] || {};
+          const isCurrentlyChecked = currentDayChecks[actualMealKey] || false;
+          
           const newChecks = {
             ...mealChecks,
             [today]: {
-              ...todayChecks,
-              [actualMealKey]: !todayChecks[actualMealKey]
+              ...currentDayChecks,
+              [actualMealKey]: !isCurrentlyChecked
             }
           };
           saveData('mealChecks', newChecks, setMealChecks);
