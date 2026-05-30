@@ -489,22 +489,25 @@
                   }
 
                   const today = new Date().toISOString().split('T')[0];
-                  const checked = mealChecks[today]?.[key];
+                  const checked = mealChecks[today]?.[key] || false;
+                  
+                  const handleMealCheck = (mealKey, isChecked) => {
+                    const updatedDayChecks = { ...(mealChecks[today] || {}) };
+                    updatedDayChecks[mealKey] = isChecked;
+                    
+                    const newChecks = {
+                      ...mealChecks,
+                      [today]: updatedDayChecks
+                    };
+                    saveData('mealChecks', newChecks, setMealChecks);
+                  };
+                  
                   return (
                     <div key={key} className="flex items-center gap-2 text-sm">
                       <input
                         type="checkbox"
-                        checked={checked || false}
-                        onChange={(e) => {
-                          const newChecks = {
-                            ...mealChecks,
-                            [today]: {
-                              ...(mealChecks[today] || {}),
-                              [key]: e.target.checked
-                            }
-                          };
-                          saveData('mealChecks', newChecks, setMealChecks);
-                        }}
+                        checked={checked}
+                        onChange={(e) => handleMealCheck(key, e.target.checked)}
                         className="w-4 h-4"
                       />
                       <span className={`flex-1 ${checked ? 'line-through text-slate-500' : 'text-slate-300'}`}>
@@ -520,6 +523,16 @@
                 className="w-full mt-3 bg-slate-700 text-slate-300 py-2 rounded text-sm hover:bg-slate-600"
               >
                 View Full Meal Plan →
+              </button>
+              <button
+                onClick={() => {
+                  const today = new Date().toISOString().split('T')[0];
+                  const newChecks = { ...mealChecks, [today]: {} };
+                  saveData('mealChecks', newChecks, setMealChecks);
+                }}
+                className="w-full mt-2 bg-slate-700 text-slate-300 py-2 rounded text-sm hover:bg-slate-600 text-xs"
+              >
+                Clear Today's Checks
               </button>
             </div>
 
