@@ -175,19 +175,21 @@
         name: "Pre-Workout Snack",
         time: "4:10am",
         defaultCalories: 245,
+        macros: { phase1: { cal: 245, protein: 5, carbs: 40, fat: 4.5 }, phase2: { cal: 270, protein: 5, carbs: 44, fat: 5 } },
         items: [
           { id: '1a', name: 'Rice cakes', amount: '2' },
           { id: '1b', name: 'Banana', amount: '1 medium' },
-          { id: '1c', name: 'Peanut butter', amount: '0.5 tbsp' }
+          { id: '1c', name: 'Peanut butter', amount: '0.5 tbsp (P1) / 1 tbsp (P2)' }
         ]
       },
       meal2: {
         name: "Breakfast",
         time: "6:15am",
         defaultCalories: 360,
+        macros: { phase1: { cal: 360, protein: 42, carbs: 28, fat: 10 }, phase2: { cal: 420, protein: 48, carbs: 32, fat: 12 } },
         items: [
-          { id: '2a', name: 'Whole eggs', amount: '2' },
-          { id: '2b', name: 'Egg whites', amount: '200ml' },
+          { id: '2a', name: 'Whole eggs', amount: '2 (P1) / 2 (P2)' },
+          { id: '2b', name: 'Egg whites', amount: '200ml (P1) / 250ml (P2)' },
           { id: '2c', name: 'Wholemeal toast', amount: '2 slices' },
           { id: '2d', name: 'Hot sauce', amount: 'to taste' }
         ]
@@ -196,10 +198,11 @@
         name: "Mid-Morning Snack",
         time: "9:00am",
         defaultCalories: 480,
+        macros: { phase1: { cal: 480, protein: 28, carbs: 75, fat: 9 }, phase2: { cal: 610, protein: 32, carbs: 95, fat: 11 } },
         items: [
           { id: '3a', name: 'Greek yogurt', amount: '150g' },
-          { id: '3b', name: 'Rolled oats', amount: '80g' },
-          { id: '3c', name: 'Blueberries', amount: '40g' },
+          { id: '3b', name: 'Rolled oats', amount: '80g (P1) / 100g (P2)' },
+          { id: '3c', name: 'Blueberries', amount: '40g (P1) / 50g (P2)' },
           { id: '3d', name: 'Honey', amount: '1 tbsp' }
         ]
       },
@@ -233,21 +236,23 @@
         name: "Afternoon Snack",
         time: "3:30pm",
         defaultCalories: 280,
+        macros: { phase1: { cal: 280, protein: 18, carbs: 45, fat: 5 }, phase2: { cal: 361, protein: 20, carbs: 58, fat: 6 } },
         items: [
           { id: '5a', name: 'Greek yogurt', amount: '150g' },
           { id: '5b', name: 'Banana', amount: '1 medium' },
-          { id: '5c', name: 'Rolled oats', amount: '30g' }
+          { id: '5c', name: 'Rolled oats', amount: '30g (P1) / 40g (P2)' }
         ]
       },
       meal6: {
         name: "Dinner",
         time: "6:00pm",
         defaultCalories: 515,
+        macros: { phase1: { cal: 695, protein: 60, carbs: 45, fat: 14 }, phase2: { cal: 689, protein: 62, carbs: 56, fat: 16 } },
         items: [
-          { id: '6a', name: 'Grilled chicken breast', amount: '220g' },
-          { id: '6b', name: 'Sweet potato', amount: '250g' },
+          { id: '6a', name: 'Grilled chicken breast', amount: '250g (P1) / 250g (P2)' },
+          { id: '6b', name: 'Sweet potato', amount: '300g (P1) / 300g (P2)' },
           { id: '6c', name: 'Steamed vegetables', amount: '150g' },
-          { id: '6d', name: 'Olive oil', amount: '0.5 tbsp' }
+          { id: '6d', name: 'Olive oil', amount: '1 tbsp' }
         ]
       }
     };
@@ -990,6 +995,7 @@
         const [searchAmount, setSearchAmount] = useState('');
         const [searchResults, setSearchResults] = useState(null);
         const [isSearching, setIsSearching] = useState(false);
+        const [viewingPhase, setViewingPhase] = useState(currentWeek <= 16 ? 1 : 2); // 1 or 2
 
         // Calculate meal totals
         const calculateMealTotals = (mealKey) => {
@@ -1317,6 +1323,30 @@
               </div>
             </div>
 
+            {/* Phase Tabs */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => setViewingPhase(1)}
+                className={`flex-1 py-3 px-4 rounded-lg font-bold transition text-sm ${
+                  viewingPhase === 1
+                    ? 'bg-amber-600 text-white'
+                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700'
+                }`}
+              >
+                ⚔️ PHASE 1
+              </button>
+              <button
+                onClick={() => setViewingPhase(2)}
+                className={`flex-1 py-3 px-4 rounded-lg font-bold transition text-sm ${
+                  viewingPhase === 2
+                    ? 'bg-amber-600 text-white'
+                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700'
+                }`}
+              >
+                💪 PHASE 2
+              </button>
+            </div>
+
             {/* Meals */}
             {Object.entries(MEAL_PLAN).map(([mealKey, meal]) => {
               // Skip rendering the non-selected lunch option
@@ -1329,10 +1359,10 @@
               const mealTotals = calculateMealTotals(mealKey);
               const customized = customizedMeals[mealKey] || {};
               
-              // Get phase-specific macros for lunch
+              // Get phase-specific macros based on viewing phase
               let displayMacros = null;
               if (meal.macros) {
-                const phaseKey = currentWeek <= 16 ? 'phase1' : 'phase2';
+                const phaseKey = viewingPhase === 1 ? 'phase1' : 'phase2';
                 displayMacros = meal.macros[phaseKey];
               }
 
@@ -1407,6 +1437,15 @@
                     {meal.items.map(item => {
                       const customItem = customized[item.id];
                       const isEditing = editingItem?.mealKey === mealKey && editingItem?.itemId === item.id;
+                      
+                      // Extract phase-specific amount from "amount (P1) / amount (P2)" format
+                      let displayAmount = item.amount;
+                      if (viewingPhase === 1 && item.amount.includes('(P1)')) {
+                        displayAmount = item.amount.match(/(.+?)\s*\(P1\)/)?.[1] || item.amount;
+                      } else if (viewingPhase === 2 && item.amount.includes('(P2)')) {
+                        const match = item.amount.match(/\/\s*(.+?)\s*\(P2\)/);
+                        if (match) displayAmount = match[1];
+                      }
 
                       return (
                         <div key={item.id} className="bg-slate-900 rounded p-2">
@@ -1414,13 +1453,13 @@
                             <div className="flex items-center justify-between">
                               <div className="flex-1">
                                 <div className="text-sm text-slate-400">{item.name}</div>
-                                <div className="text-xs text-slate-500">{item.amount}</div>
+                                <div className="text-xs text-slate-500">{displayAmount}</div>
                               </div>
                               <button
                                 onClick={() => {
                                   setEditingItem({ mealKey, itemId: item.id });
                                   setSearchQuery(item.name);
-                                  setSearchAmount(item.amount);
+                                  setSearchAmount(displayAmount);
                                 }}
                                 className="text-xs text-amber-400 hover:text-amber-300"
                               >
