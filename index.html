@@ -203,15 +203,31 @@
           { id: '3d', name: 'Honey', amount: '1 tbsp' }
         ]
       },
-      meal4: {
-        name: "Lunch - Green Curry or Nachos",
+      lunchCurry: {
+        name: "Lunch - Green Curry",
         time: "12:30pm",
         defaultCalories: 800,
+        macros: { phase1: { cal: 800, protein: 62, carbs: 88, fat: 16 }, phase2: { cal: 1035, protein: 75.6, carbs: 112.5, fat: 21.5 } },
         items: [
-          { id: '4a', name: 'Chicken breast', amount: '220g' },
-          { id: '4b', name: 'Light coconut milk or cornchips', amount: '120ml / 30g' },
-          { id: '4c', name: 'Jasmine rice', amount: '250g' },
-          { id: '4d', name: 'Mixed vegetables or black beans', amount: '150g' }
+          { id: '4a', name: 'Chicken breast (grilled)', amount: '220g (Phase 1) / 270g (Phase 2)' },
+          { id: '4b', name: 'Light coconut milk', amount: '120ml (P1) / 150ml (P2)' },
+          { id: '4c', name: 'Jasmine rice (cooked)', amount: '250g (P1) / 350g (P2)' },
+          { id: '4d', name: 'Mixed vegetables (broccoli, capsicum, etc)', amount: '150g' }
+        ]
+      },
+      lunchNachos: {
+        name: "Lunch - Nachos",
+        time: "12:30pm",
+        defaultCalories: 780,
+        macros: { phase1: { cal: 780, protein: 60, carbs: 95, fat: 20 }, phase2: { cal: 1029, protein: 74.4, carbs: 117, fat: 26.9 } },
+        items: [
+          { id: '4e', name: 'Cornchips', amount: '30g (P1) / 40g (P2)' },
+          { id: '4f', name: 'Extra lean beef mince (cooked)', amount: '200g (P1) / 240g (P2)' },
+          { id: '4g', name: 'Black beans', amount: '150g' },
+          { id: '4h', name: 'Jasmine rice (cooked)', amount: '200g (P1) / 250g (P2)' },
+          { id: '4i', name: 'Lactose-free Bega cheese', amount: '20g (small sprinkle)' },
+          { id: '4j', name: 'Light sour cream', amount: '20g (dollop)' },
+          { id: '4k', name: 'Hot sauce', amount: 'to taste' }
         ]
       },
       meal5: {
@@ -277,6 +293,7 @@
       const [customizedMeals, setCustomizedMeals] = useState({});
       const [currentDay, setCurrentDay] = useState('monday');
       const [isLoading, setIsLoading] = useState(true);
+      const [lunchChoice, setLunchChoice] = useState('curry'); // 'curry' or 'nachos'
 
       useEffect(() => {
         loadData();
@@ -435,6 +452,12 @@
               </h3>
               <div className="space-y-2">
                 {Object.entries(MEAL_PLAN).map(([key, meal]) => {
+                  // Skip non-selected lunch option
+                  if ((key === 'lunchCurry' && lunchChoice !== 'curry') ||
+                      (key === 'lunchNachos' && lunchChoice !== 'nachos')) {
+                    return null;
+                  }
+
                   const today = new Date().toISOString().split('T')[0];
                   const checked = mealChecks[today]?.[key];
                   return (
@@ -457,7 +480,7 @@
                       <span className={`flex-1 ${checked ? 'line-through text-slate-500' : 'text-slate-300'}`}>
                         {meal.name} ({meal.time})
                       </span>
-                      <span className="text-amber-400 text-xs">{meal.calories}cal</span>
+                      <span className="text-amber-400 text-xs">{meal.defaultCalories}cal</span>
                     </div>
                   );
                 })}
@@ -948,6 +971,19 @@
           const meal = MEAL_PLAN[mealKey];
           const customized = customizedMeals[mealKey] || {};
           
+          // If meal has phase-specific macros (lunch), use those
+          if (meal.macros) {
+            const phaseKey = currentWeek <= 16 ? 'phase1' : 'phase2';
+            const phaseMacros = meal.macros[phaseKey];
+            return {
+              calories: phaseMacros.cal,
+              protein: phaseMacros.protein,
+              carbs: phaseMacros.carbs,
+              fats: phaseMacros.fat,
+              isEstimate: false
+            };
+          }
+          
           let totalCals = 0;
           let totalProtein = 0;
           let totalCarbs = 0;
@@ -988,6 +1024,12 @@
           let total = { calories: 0, protein: 0, carbs: 0, fats: 0 };
 
           Object.keys(MEAL_PLAN).forEach(mealKey => {
+            // Skip non-selected lunch option
+            if ((mealKey === 'lunchCurry' && lunchChoice !== 'curry') ||
+                (mealKey === 'lunchNachos' && lunchChoice !== 'nachos')) {
+              return;
+            }
+
             if (todayChecks[mealKey]) {
               const mealTotals = calculateMealTotals(mealKey);
               total.calories += mealTotals.calories || 0;
@@ -1194,11 +1236,15 @@
 
         // Toggle meal check
         const toggleMealCheck = async (mealKey) => {
+          const actualMealKey = (mealKey === 'lunchCurry' || mealKey === 'lunchNachos') 
+            ? (lunchChoice === 'curry' ? 'lunchCurry' : 'lunchNachos')
+            : mealKey;
+          
           const newChecks = {
             ...mealChecks,
             [today]: {
               ...todayChecks,
-              [mealKey]: !todayChecks[mealKey]
+              [actualMealKey]: !todayChecks[actualMealKey]
             }
           };
           saveData('mealChecks', newChecks, setMealChecks);
@@ -1229,12 +1275,51 @@
 
             {/* Meals */}
             {Object.entries(MEAL_PLAN).map(([mealKey, meal]) => {
-              const isChecked = todayChecks[mealKey];
+              // Skip rendering the non-selected lunch option
+              if ((mealKey === 'lunchCurry' && lunchChoice !== 'curry') ||
+                  (mealKey === 'lunchNachos' && lunchChoice !== 'nachos')) {
+                return null;
+              }
+
+              const isChecked = todayChecks[mealKey] || todayChecks[(lunchChoice === 'curry' ? 'lunchCurry' : 'lunchNachos')];
               const mealTotals = calculateMealTotals(mealKey);
               const customized = customizedMeals[mealKey] || {};
+              
+              // Get phase-specific macros for lunch
+              let displayMacros = null;
+              if (meal.macros) {
+                const phaseKey = currentWeek <= 16 ? 'phase1' : 'phase2';
+                displayMacros = meal.macros[phaseKey];
+              }
 
               return (
                 <div key={mealKey} className="bg-slate-800 rounded-lg p-4 border border-slate-700">
+                  {/* Lunch Tab Switcher */}
+                  {(mealKey === 'lunchCurry') && (
+                    <div className="mb-3 flex gap-2">
+                      <button
+                        onClick={() => setLunchChoice('curry')}
+                        className={`flex-1 py-2 px-3 rounded text-sm font-bold transition ${
+                          lunchChoice === 'curry'
+                            ? 'bg-amber-600 text-white'
+                            : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                        }`}
+                      >
+                        🍛 Curry
+                      </button>
+                      <button
+                        onClick={() => setLunchChoice('nachos')}
+                        className={`flex-1 py-2 px-3 rounded text-sm font-bold transition ${
+                          lunchChoice === 'nachos'
+                            ? 'bg-amber-600 text-white'
+                            : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                        }`}
+                      >
+                        🌮 Nachos
+                      </button>
+                    </div>
+                  )}
+
                   {/* Meal Header */}
                   <div className="flex items-center gap-3 mb-3">
                     <button
@@ -1250,14 +1335,25 @@
                       <div className="text-xs text-slate-400">🕐 {meal.time}</div>
                     </div>
                     <div className="text-right">
-                      <div className="text-amber-400 font-bold">{mealTotals.calories} cal</div>
-                      {!mealTotals.isEstimate && (
-                        <div className="text-xs text-slate-400">
-                          P:{mealTotals.protein} C:{mealTotals.carbs} F:{mealTotals.fats}
-                        </div>
-                      )}
-                      {mealTotals.isEstimate && (
-                        <div className="text-xs text-amber-600">estimate</div>
+                      {displayMacros ? (
+                        <>
+                          <div className="text-amber-400 font-bold">{displayMacros.cal} cal</div>
+                          <div className="text-xs text-slate-300">
+                            P:{Math.round(displayMacros.protein)}g C:{Math.round(displayMacros.carbs)}g F:{Math.round(displayMacros.fat)}g
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="text-amber-400 font-bold">{mealTotals.calories} cal</div>
+                          {!mealTotals.isEstimate && (
+                            <div className="text-xs text-slate-400">
+                              P:{mealTotals.protein} C:{mealTotals.carbs} F:{mealTotals.fats}
+                            </div>
+                          )}
+                          {mealTotals.isEstimate && (
+                            <div className="text-xs text-amber-600">estimate</div>
+                          )}
+                        </>
                       )}
                     </div>
                   </div>
