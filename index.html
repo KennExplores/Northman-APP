@@ -1053,6 +1053,9 @@
         // Calculate daily totals
         const calculateDailyTotals = () => {
           let total = { calories: 0, protein: 0, carbs: 0, fats: 0 };
+          
+          // Determine which phase to use
+          const phaseKey = currentWeek <= 16 ? 'phase1' : 'phase2';
 
           Object.keys(MEAL_PLAN).forEach(mealKey => {
             // Skip non-selected lunch option
@@ -1062,11 +1065,23 @@
             }
 
             if (todayChecks[mealKey]) {
-              const mealTotals = calculateMealTotals(mealKey);
-              total.calories += mealTotals.calories || 0;
-              if (typeof mealTotals.protein === 'number') total.protein += mealTotals.protein;
-              if (typeof mealTotals.carbs === 'number') total.carbs += mealTotals.carbs;
-              if (typeof mealTotals.fats === 'number') total.fats += mealTotals.fats;
+              const meal = MEAL_PLAN[mealKey];
+              
+              // Use phase-specific macros if available
+              if (meal.macros) {
+                const phaseMacros = meal.macros[phaseKey];
+                total.calories += phaseMacros.cal || 0;
+                total.protein += phaseMacros.protein || 0;
+                total.carbs += phaseMacros.carbs || 0;
+                total.fats += phaseMacros.fat || 0;
+              } else {
+                // Fallback to calculating from customized items
+                const mealTotals = calculateMealTotals(mealKey);
+                total.calories += mealTotals.calories || 0;
+                if (typeof mealTotals.protein === 'number') total.protein += mealTotals.protein;
+                if (typeof mealTotals.carbs === 'number') total.carbs += mealTotals.carbs;
+                if (typeof mealTotals.fats === 'number') total.fats += mealTotals.fats;
+              }
             }
           });
 
