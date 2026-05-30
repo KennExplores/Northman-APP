@@ -55,7 +55,7 @@
     // PROGRAM DATA
     // ============================================
     
-    const PROGRAM_START_DATE = new Date('2026-05-25'); // Monday, May 25th 2026
+    const PROGRAM_START_DATE = new Date('2026-06-01'); // Sunday, June 1st 2026
     
     const calculateCurrentWeek = () => {
       const today = new Date();
@@ -170,8 +170,7 @@
       }
     };
 
-    // Phase 1: Weeks 1-16 (Months 1-4) - Fat Loss: 2,860 cal | 230g protein
-    const MEAL_PLAN_PHASE_1 = {
+    const MEAL_PLAN = {
       meal1: {
         name: "Pre-Workout Snack",
         time: "4:10am",
@@ -205,26 +204,14 @@
         ]
       },
       meal4: {
-        name: "Lunch - Green Curry (PHASE 1)",
+        name: "Lunch - Green Curry or Nachos",
         time: "12:30pm",
         defaultCalories: 800,
         items: [
           { id: '4a', name: 'Chicken breast', amount: '220g' },
-          { id: '4b', name: 'Light coconut milk', amount: '120ml' },
-          { id: '4c', name: 'Jasmine rice (cooked)', amount: '250g' },
-          { id: '4d', name: 'Mixed vegetables', amount: '150g' }
-        ]
-      },
-      meal4b: {
-        name: "Lunch - Nachos (PHASE 1)",
-        time: "12:30pm",
-        defaultCalories: 780,
-        items: [
-          { id: '4e', name: 'Cornchips', amount: '30g' },
-          { id: '4f', name: 'Extra lean beef mince', amount: '200g' },
-          { id: '4g', name: 'Black beans', amount: '150g' },
-          { id: '4h', name: 'Jasmine rice (cooked)', amount: '200g' },
-          { id: '4i', name: 'Hot sauce', amount: 'to taste' }
+          { id: '4b', name: 'Light coconut milk or cornchips', amount: '120ml / 30g' },
+          { id: '4c', name: 'Jasmine rice', amount: '250g' },
+          { id: '4d', name: 'Mixed vegetables or black beans', amount: '150g' }
         ]
       },
       meal5: {
@@ -243,94 +230,12 @@
         defaultCalories: 515,
         items: [
           { id: '6a', name: 'Grilled chicken breast', amount: '220g' },
-          { id: '6b', name: 'Sweet potato (baked)', amount: '250g' },
+          { id: '6b', name: 'Sweet potato', amount: '250g' },
           { id: '6c', name: 'Steamed vegetables', amount: '150g' },
           { id: '6d', name: 'Olive oil', amount: '0.5 tbsp' }
         ]
       }
     };
-
-    // Phase 2: Weeks 17-24 (Months 5-6) - Lean Bulk: 3,385 cal | 240g protein
-    const MEAL_PLAN_PHASE_2 = {
-      meal1: {
-        name: "Pre-Workout Snack",
-        time: "4:10am",
-        defaultCalories: 270,
-        items: [
-          { id: '1a', name: 'Rice cakes', amount: '2' },
-          { id: '1b', name: 'Banana', amount: '1 medium' },
-          { id: '1c', name: 'Peanut butter', amount: '1 tbsp' }
-        ]
-      },
-      meal2: {
-        name: "Breakfast",
-        time: "6:15am",
-        defaultCalories: 420,
-        items: [
-          { id: '2a', name: 'Whole eggs', amount: '2' },
-          { id: '2b', name: 'Egg whites', amount: '250ml' },
-          { id: '2c', name: 'Wholemeal toast', amount: '2 slices' },
-          { id: '2d', name: 'Hot sauce', amount: 'to taste' }
-        ]
-      },
-      meal3: {
-        name: "Mid-Morning Snack",
-        time: "9:00am",
-        defaultCalories: 610,
-        items: [
-          { id: '3a', name: 'Greek yogurt', amount: '150g' },
-          { id: '3b', name: 'Rolled oats', amount: '100g' },
-          { id: '3c', name: 'Blueberries', amount: '50g' },
-          { id: '3d', name: 'Honey', amount: '1 tbsp' }
-        ]
-      },
-      meal4: {
-        name: "Lunch - Green Curry (PHASE 2)",
-        time: "12:30pm",
-        defaultCalories: 1035,
-        items: [
-          { id: '4a', name: 'Chicken breast', amount: '270g' },
-          { id: '4b', name: 'Light coconut milk', amount: '150ml' },
-          { id: '4c', name: 'Jasmine rice (cooked)', amount: '350g' },
-          { id: '4d', name: 'Mixed vegetables', amount: '150g' }
-        ]
-      },
-      meal4b: {
-        name: "Lunch - Nachos (PHASE 2)",
-        time: "12:30pm",
-        defaultCalories: 1029,
-        items: [
-          { id: '4e', name: 'Cornchips', amount: '40g' },
-          { id: '4f', name: 'Extra lean beef mince', amount: '240g' },
-          { id: '4g', name: 'Black beans', amount: '150g' },
-          { id: '4h', name: 'Jasmine rice (cooked)', amount: '250g' },
-          { id: '4i', name: 'Hot sauce', amount: 'to taste' }
-        ]
-      },
-      meal5: {
-        name: "Afternoon Snack",
-        time: "3:30pm",
-        defaultCalories: 361,
-        items: [
-          { id: '5a', name: 'Greek yogurt', amount: '150g' },
-          { id: '5b', name: 'Banana', amount: '1 medium' },
-          { id: '5c', name: 'Rolled oats', amount: '40g' }
-        ]
-      },
-      meal6: {
-        name: "Dinner",
-        time: "6:00pm",
-        defaultCalories: 689,
-        items: [
-          { id: '6a', name: 'Grilled chicken breast', amount: '250g' },
-          { id: '6b', name: 'Sweet potato (baked)', amount: '350g' },
-          { id: '6c', name: 'Steamed vegetables', amount: '150g' },
-          { id: '6d', name: 'Olive oil', amount: '1 tbsp' }
-        ]
-      }
-    };
-
-
 
     // ============================================
     // STORAGE (localStorage for GitHub Pages)
@@ -372,12 +277,6 @@
       const [customizedMeals, setCustomizedMeals] = useState({});
       const [currentDay, setCurrentDay] = useState('monday');
       const [isLoading, setIsLoading] = useState(true);
-
-      // Select meal plan based on current week
-      const MEAL_PLAN = currentWeek <= 16 ? MEAL_PLAN_PHASE_1 : MEAL_PLAN_PHASE_2;
-      const isPhase1 = currentWeek <= 16;
-      const phaseLabel = isPhase1 ? 'PHASE 1: FAT LOSS' : 'PHASE 2: LEAN BULK';
-      const phaseMacros = isPhase1 ? { cal: 2860, protein: 230, carbs: 303, fat: 76.5 } : { cal: 3385, protein: 240, carbs: 382, fat: 84 };
 
       useEffect(() => {
         loadData();
