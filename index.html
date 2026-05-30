@@ -1387,7 +1387,7 @@
                 return null;
               }
 
-              const isChecked = todayChecks[mealKey] || todayChecks[(lunchChoice === 'curry' ? 'lunchCurry' : 'lunchNachos')];
+              const isChecked = todayChecks[mealKey];
               const mealTotals = calculateMealTotals(mealKey);
               const customized = customizedMeals[mealKey] || {};
               
