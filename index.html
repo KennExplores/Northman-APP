@@ -499,7 +499,7 @@
                           const newChecks = {
                             ...mealChecks,
                             [today]: {
-                              ...mealChecks[today],
+                              ...(mealChecks[today] || {}),
                               [key]: e.target.checked
                             }
                           };
