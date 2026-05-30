@@ -1715,23 +1715,23 @@
 
             {/* Targets */}
             <div className="bg-slate-800 rounded-lg p-4 border border-amber-600/30">
-              <h3 className="text-amber-400 font-bold mb-2">⚡ DAILY TARGETS</h3>
-              <div className="space-y-1 text-sm text-slate-300">
+              <h3 className="text-amber-400 font-bold mb-3">⚡ {currentWeek <= 16 ? '⚔️ PHASE 1' : '💪 PHASE 2'} TARGETS</h3>
+              <div className="space-y-2 text-sm text-slate-300">
                 <div className="flex justify-between">
                   <span>Calories:</span>
-                  <span className="text-amber-400 font-bold">3,500-3,700</span>
+                  <span className="text-amber-400 font-bold">{currentWeek <= 16 ? '2,860' : '3,385'}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Protein:</span>
-                  <span className="text-amber-400 font-bold">200-220g</span>
+                  <span className="text-amber-400 font-bold">{currentWeek <= 16 ? '230g' : '240g'}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Carbs:</span>
-                  <span className="text-amber-400 font-bold">350-450g</span>
+                  <span className="text-amber-400 font-bold">{currentWeek <= 16 ? '303g' : '382g'}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Fats:</span>
-                  <span className="text-amber-400 font-bold">80-100g</span>
+                  <span className="text-amber-400 font-bold">{currentWeek <= 16 ? '76.5g' : '84g'}</span>
                 </div>
               </div>
             </div>
