@@ -76,14 +76,15 @@
         focus: "Chest Thickness & Back Development",
         emoji: "⚔️",
         gym: "Anytime Fitness Stellar",
+        cardio: "POST-STRENGTH: 20-25 min incline treadmill or rowing machine (LISS - easy pace)",
         exercises: [
-          { name: "Barbell Bench Press", sets: 4, reps: "6-8", type: "compound", note: "Warrior strength base" },
-          { name: "Barbell Bent-Over Row", sets: 4, reps: "6-8", type: "compound", note: "Back thickness" },
+          { name: "Barbell Bench Press", sets: 4, reps: "5-6", type: "compound", note: "Warrior strength base" },
+          { name: "Barbell Bent-Over Row", sets: 4, reps: "5-6", type: "compound", note: "Back thickness" },
           { name: "Incline Dumbbell Press", sets: 3, reps: "8-10", type: "accessory" },
-          { name: "Seal Rows (Machine or DB)", sets: 3, reps: "10-12", type: "accessory" },
+          { name: "Seal Rows (Machine or DB)", sets: 3, reps: "8-10", type: "accessory" },
+          { name: "Barbell Shrugs", sets: 3, reps: "8-10", type: "accessory", note: "Warrior traps" },
           { name: "Cable Flyes", sets: 3, reps: "12-15", type: "isolation" },
-          { name: "Cable Rows (High-to-Low)", sets: 3, reps: "12-15", type: "isolation" },
-          { name: "Chest Dips (if available)", sets: 2, reps: "8-12", type: "accessory" },
+          { name: "Face Pulls", sets: 3, reps: "15-20", type: "isolation", note: "Rear delts + shoulder health" }
         ]
       },
       tuesday: {
@@ -91,13 +92,14 @@
         focus: "Lean Leg Strength & Athletic Development",
         emoji: "🦵",
         gym: "Anytime Fitness Stellar",
+        cardio: "POST-STRENGTH: 20-25 min stationary bike or incline treadmill (LISS - light legs already worked)",
         exercises: [
-          { name: "Barbell Back Squat", sets: 4, reps: "6-8", type: "compound", note: "Foundation strength" },
-          { name: "Barbell Deadlift", sets: 4, reps: "5-6", type: "compound", note: "Posterior chain power" },
+          { name: "Barbell Back Squat", sets: 4, reps: "5-6", type: "compound", note: "Foundation strength" },
+          { name: "Barbell Deadlift", sets: 4, reps: "3-5", type: "compound", note: "Posterior chain power" },
+          { name: "Romanian Deadlift (RDL)", sets: 3, reps: "6-8", type: "compound", note: "Hamstring thickness" },
           { name: "Bulgarian Split Squat", sets: 3, reps: "8-10/leg", type: "accessory" },
-          { name: "Single-Leg Romanian Deadlift", sets: 3, reps: "10/leg", type: "accessory" },
-          { name: "Walking Lunges (weighted)", sets: 3, reps: "12/leg", type: "accessory" },
-          { name: "Leg Curl (Machine)", sets: 2, reps: "12-15", type: "isolation", note: "Hamstring definition" },
+          { name: "Leg Curl (Machine)", sets: 3, reps: "8-10", type: "isolation", note: "Hamstring definition" },
+          { name: "Farmer Carries", sets: 3, reps: "40-50m", type: "compound", note: "Grip strength + core" }
         ]
       },
       wednesday: {
@@ -105,14 +107,15 @@
         focus: "SKARSGÅRD SHOULDERS & BACK V-TAPER",
         emoji: "💪",
         gym: "Anytime Fitness Stellar",
+        cardio: "NO POST-CARDIO - High volume day. Rest and stretch.",
         exercises: [
-          { name: "Barbell Overhead Press", sets: 4, reps: "6-8", type: "compound", note: "Boulder shoulders" },
-          { name: "Weighted Pull-Ups or Lat Pulldown", sets: 4, reps: "8-10", type: "compound", note: "Back width" },
-          { name: "Dumbbell Lateral Raises", sets: 4, reps: "12-15", type: "accessory", note: "Shoulder caps (CRITICAL)" },
-          { name: "Cable Upright Rows", sets: 3, reps: "12-15", type: "accessory" },
-          { name: "Wide-Grip Lat Pulldown", sets: 3, reps: "10-12", type: "accessory", note: "V-taper width" },
-          { name: "Rear Delt Machine Flyes", sets: 3, reps: "12-15", type: "isolation", note: "Back thickness" },
-          { name: "Shrugs (Barbell or DB)", sets: 3, reps: "12-15", type: "accessory" },
+          { name: "Barbell Overhead Press (OHP)", sets: 4, reps: "6-8", type: "compound", note: "Boulder shoulders" },
+          { name: "Weighted Pull-Ups or Lat Pulldown", sets: 4, reps: "6-10", type: "compound", note: "Back width" },
+          { name: "Dumbbell Lateral Raises", sets: 4, reps: "12-15", type: "accessory", note: "CRITICAL for width" },
+          { name: "Incline Dumbbell Press", sets: 3, reps: "8-10", type: "accessory", note: "Upper chest armor" },
+          { name: "Wide-Grip Lat Pulldown", sets: 3, reps: "8-10", type: "accessory", note: "V-taper width" },
+          { name: "Low-to-High Cable Flyes", sets: 3, reps: "12-15", type: "isolation", note: "Upper chest definition" },
+          { name: "Rear Delt Machine Flyes", sets: 3, reps: "12-15", type: "isolation", note: "Back thickness" }
         ]
       },
       thursday: {
@@ -120,51 +123,57 @@
         focus: "Lean, Defined Leg Development",
         emoji: "🏔️",
         gym: "Anytime Fitness Stellar",
+        cardio: "NO POST-CARDIO - Preserve energy for Saturday.",
         exercises: [
-          { name: "Dumbbell Step-Ups (heavy)", sets: 4, reps: "10-12/leg", type: "compound" },
-          { name: "Machine Leg Press", sets: 3, reps: "10-12", type: "compound", note: "Clean reps, full range" },
+          { name: "Dumbbell Step-Ups (heavy)", sets: 4, reps: "8-10/leg", type: "compound", note: "Athletic leg development" },
+          { name: "Leg Press", sets: 4, reps: "8-12", type: "compound", note: "Volume for size" },
           { name: "Leg Extensions", sets: 3, reps: "12-15", type: "isolation", note: "Quad definition" },
-          { name: "Single-Leg Leg Curl", sets: 3, reps: "12-15/leg", type: "isolation" },
-          { name: "Calf Raises (Standing)", sets: 3, reps: "15-20", type: "accessory" },
-          { name: "Ab Wheel Rollout", sets: 2, reps: "10-15", type: "core" },
+          { name: "Single-Leg Leg Curl", sets: 3, reps: "10-12/leg", type: "isolation", note: "Hamstring balance" },
+          { name: "Hip Thrusts", sets: 3, reps: "8-10", type: "compound", note: "Glute development + posture" },
+          { name: "Calf Raises (Standing)", sets: 3, reps: "12-15", type: "accessory" }
         ]
       },
       friday: {
         name: "Upper Definition (Arms & Shoulders)",
-        focus: "SKARSGÅRD ARM & SHOULDER DEFINITION",
+        focus: "Arm & Shoulder Definition",
         emoji: "🔥",
         gym: "Anytime Fitness Stellar",
+        cardio: "NO POST-CARDIO - Finisher day, preserve energy.",
         exercises: [
-          { name: "Dumbbell Overhead Press", sets: 3, reps: "8-10", type: "compound" },
-          { name: "Dumbbell Lateral Raises", sets: 4, reps: "12-15", type: "accessory", note: "Shoulder pop" },
-          { name: "Cable Bicep Curls (rope or bar)", sets: 3, reps: "12-15", type: "isolation", note: "Arm definition" },
-          { name: "Cable Tricep Pushdowns", sets: 3, reps: "12-15", type: "isolation" },
-          { name: "Hammer Curls (Dumbbell)", sets: 3, reps: "12-15", type: "accessory" },
-          { name: "Overhead Tricep Extension (DB or cable)", sets: 3, reps: "12-15", type: "accessory" },
-          { name: "Cable Face Pulls", sets: 3, reps: "15-20", type: "mobility", note: "Shoulder health" },
-          { name: "Concentration Curls", sets: 2, reps: "15", type: "isolation", note: "Final pump" },
+          { name: "Dumbbell Overhead Press", sets: 4, reps: "8-10", type: "compound", note: "Shoulder pop" },
+          { name: "Dumbbell Lateral Raises", sets: 4, reps: "12-15", type: "accessory", note: "CRITICAL for width" },
+          { name: "Cable Bicep Curls", sets: 3, reps: "10-12", type: "isolation", note: "Arm definition" },
+          { name: "Cable Tricep Pushdowns", sets: 3, reps: "10-12", type: "isolation", note: "Tricep pop" },
+          { name: "Hammer Curls", sets: 3, reps: "10-12", type: "accessory", note: "Forearm development" },
+          { name: "Overhead Tricep Extensions", sets: 3, reps: "10-12", type: "accessory", note: "Tricep stretch" },
+          { name: "Farmer Carries", sets: 3, reps: "50m", type: "compound", note: "Grip strength + traps" }
         ]
       },
       saturday: {
-        name: "Warrior Conditioning (Hike/Ruck/Prep)",
-        focus: "Northman Endurance & Solo Camping Prep",
+        name: "Warrior Conditioning (Ruck/Hike)",
+        focus: "FAT LOSS CARDIO + Functional Conditioning",
         emoji: "🥾",
-        gym: "Outdoor - Canberra Nature",
+        gym: "Outdoor - Canberra",
+        cardio: "CHOOSE ONE: Ruck (10-15kg, 10km) OR Hike (8km) OR Solo Camping - Phase 1 favors Ruck for consistent fat loss",
         exercises: [
-          { name: "Weighted Ruck (10-20kg)", sets: 1, reps: "60-90min", type: "cardio", note: "Build to 20kg over 6 months" },
-          { name: "Hiking (Local trails near Canberra)", sets: 1, reps: "45-120min", type: "cardio", note: "Scout camping routes" },
-          { name: "Camping Prep Work (if camping weekend)", sets: 1, reps: "full day", type: "training", note: "Setup, wood gathering, survival skills" },
+          { name: "Weighted Ruck March (BEST for Phase 1)", sets: 1, reps: "90min", type: "cardio", note: "10kg Week 1-4, 15kg Week 5-16, 10km distance" },
+          { name: "Hiking Alternative", sets: 1, reps: "60-90min", type: "cardio", note: "8km with elevation gain, scout camping routes" },
+          { name: "Solo Camping Weekend (1-2x/month)", sets: 1, reps: "full day", type: "active recovery", note: "Setup, exploration, mental reset" }
         ]
       },
       sunday: {
-        name: "Recovery & Warrior Preparation",
-        focus: "Rest, Mobility & Mental Fortitude",
+        name: "Recovery & Meal Prep",
+        focus: "Active Recovery Only - Prepare for next week",
         emoji: "🛡️",
+        cardio: "OPTIONAL: 30-45min easy walk (flat terrain, NO INTENSITY)",
         exercises: [
-          { name: "Easy Walk or Light Hike", sets: 1, reps: "20-30min", type: "recovery" },
-          { name: "Deep Stretching", sets: 1, reps: "20min", type: "mobility" },
-          { name: "Foam Rolling (full body)", sets: 1, reps: "15min", type: "mobility" },
-          { name: "Cold Exposure (cold shower/plunge if available)", sets: 1, reps: "2-3min", type: "warrior", note: "Northman mental toughness" },
+          { name: "Easy Walk (flat terrain)", sets: 1, reps: "30-45min", type: "recovery", note: "Low heart rate, conversational pace" },
+          { name: "Deep Stretching (full body)", sets: 1, reps: "15min", type: "mobility" },
+          { name: "Foam Rolling (problem areas)", sets: 1, reps: "10-15min", type: "recovery" },
+          { name: "Cold Exposure (optional)", sets: 1, reps: "2-3min", type: "conditioning", note: "Cold shower or ice bath" },
+          { name: "Meal Prep for Week (CRITICAL)", sets: 1, reps: "60-90min", type: "nutrition", note: "Prep all protein + rice/potatoes for the week" }
+        ]
+      }
           { name: "Meal Prep for Week", sets: 1, reps: "60-90min", type: "nutrition", note: "Stay locked in" },
         ]
       }
