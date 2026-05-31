@@ -618,7 +618,35 @@
           );
         };
 
-        const saveWorkout = async () => {
+        const getLastAttempt = (dayName, exerciseName) => {
+          // Find all past workouts for this day (excluding today)
+          const today = new Date().toISOString().split('T')[0];
+          const pastWorkouts = Object.entries(workoutHistory || {})
+            .filter(([key, data]) => {
+              const [date, day] = key.split('-');
+              return day === dayName && date !== today;
+            })
+            .sort((a, b) => b[0].localeCompare(a[0])); // Sort by date descending
+          
+          if (pastWorkouts.length === 0) return null;
+          
+          // Get the most recent workout
+          const mostRecent = pastWorkouts[0][1];
+          const exerciseIndex = mostRecent.exercises ? 
+            Object.keys(mostRecent.exercises).find(idx => {
+              // Find the exercise by matching name or position
+              return WORKOUTS[dayName].exercises[idx]?.name === exerciseName;
+            }) : null;
+          
+          if (!exerciseIndex || !mostRecent.exercises[exerciseIndex]) {
+            return null;
+          }
+          
+          return {
+            date: mostRecent.date,
+            data: mostRecent.exercises[exerciseIndex]
+          };
+        };
           const today = new Date().toISOString().split('T')[0];
           const key = `${today}-${currentDay}`;
           const workout = WORKOUTS[currentDay];
@@ -714,8 +742,32 @@
                       </span>
                     </div>
 
+                    {/* Last Attempt Tracker */}
+                    {exercise.type !== 'recovery' && exercise.type !== 'cardio' && (() => {
+                      const lastAttempt = getLastAttempt(currentDay, exercise.name);
+                      return lastAttempt ? (
+                        <div className="bg-slate-900 rounded p-3 mb-3 border-l-2 border-amber-600">
+                          <div className="text-xs text-amber-400 font-bold mb-1">
+                            📊 LAST ATTEMPT ({lastAttempt.date})
+                          </div>
+                          <div className="space-y-1">
+                            {Object.entries(lastAttempt.data).map(([setIdx, setData]) => (
+                              <div key={setIdx} className="text-xs text-slate-300">
+                                Set {parseInt(setIdx) + 1}: {setData.weight || '—'} {setData.reps || '—'} reps
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="bg-slate-900 rounded p-3 mb-3 text-xs text-slate-500 italic">
+                          First time doing this! 🎯
+                        </div>
+                      );
+                    })()}
+
                     {exercise.type !== 'recovery' && exercise.type !== 'cardio' && (
                       <div className="space-y-2">
+                        <div className="text-xs text-amber-300 font-bold">💪 TODAY'S ATTEMPT</div>
                         {setsArray.map(setIndex => (
                           <div key={setIndex} className="flex items-center gap-2">
                             <span className="text-sm font-semibold text-slate-400 w-12">
