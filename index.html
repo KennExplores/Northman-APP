@@ -619,34 +619,34 @@
         };
 
         const getLastAttempt = (dayName, exerciseName) => {
-          // Find all past workouts for this day (excluding today)
-          const today = new Date().toISOString().split('T')[0];
-          const pastWorkouts = Object.entries(workoutHistory || {})
-            .filter(([key, data]) => {
-              const [date, day] = key.split('-');
-              return day === dayName && date !== today;
-            })
-            .sort((a, b) => b[0].localeCompare(a[0])); // Sort by date descending
-          
-          if (pastWorkouts.length === 0) return null;
-          
-          // Get the most recent workout
-          const mostRecent = pastWorkouts[0][1];
-          const exerciseIndex = mostRecent.exercises ? 
-            Object.keys(mostRecent.exercises).find(idx => {
-              // Find the exercise by matching name or position
-              return WORKOUTS[dayName].exercises[idx]?.name === exerciseName;
-            }) : null;
-          
-          if (!exerciseIndex || !mostRecent.exercises[exerciseIndex]) {
+          try {
+            const today = new Date().toISOString().split('T')[0];
+            const pastWorkouts = Object.entries(workoutHistory || {})
+              .filter(([key]) => key.includes(`-${dayName}`) && !key.startsWith(today))
+              .sort((a, b) => b[0].localeCompare(a[0]));
+            
+            if (pastWorkouts.length === 0) return null;
+            
+            const mostRecent = pastWorkouts[0][1];
+            if (!mostRecent.exercises) return null;
+            
+            // Find exercise data by index matching
+            for (let idx in mostRecent.exercises) {
+              const exData = mostRecent.exercises[idx];
+              if (typeof exData === 'object' && Object.keys(exData).length > 0) {
+                return {
+                  date: mostRecent.date,
+                  data: exData
+                };
+              }
+            }
+            return null;
+          } catch (e) {
             return null;
           }
-          
-          return {
-            date: mostRecent.date,
-            data: mostRecent.exercises[exerciseIndex]
-          };
         };
+
+        const saveWorkout = async () => {
           const today = new Date().toISOString().split('T')[0];
           const key = `${today}-${currentDay}`;
           const workout = WORKOUTS[currentDay];
