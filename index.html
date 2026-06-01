@@ -328,7 +328,32 @@
           if (history && typeof history === 'object') setWorkoutHistory(history);
           if (Array.isArray(measures)) setMeasurements(measures);
           if (Array.isArray(pics)) setPhotos(pics);
-          if (meals && typeof meals === 'object') setMealChecks(meals);
+          if (meals && typeof meals === 'object') {
+            // Check if today's date exists in mealChecks
+            const today = new Date().toISOString().split('T')[0];
+            if (!meals[today]) {
+              // Create fresh entry for today
+              const updatedMeals = {
+                ...meals,
+                [today]: {}
+              };
+              // Clean up old entries (keep only last 7 days)
+              const sevenDaysAgo = new Date();
+              sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+              const cutoffDate = sevenDaysAgo.toISOString().split('T')[0];
+              
+              Object.keys(updatedMeals).forEach(date => {
+                if (date < cutoffDate) {
+                  delete updatedMeals[date];
+                }
+              });
+              
+              setMealChecks(updatedMeals);
+              storage.set('mealChecks', updatedMeals);
+            } else {
+              setMealChecks(meals);
+            }
+          }
           if (customMeals && typeof customMeals === 'object') setCustomizedMeals(customMeals);
         } catch (error) {
           console.log('Error loading data:', error);
@@ -1069,6 +1094,29 @@
       const MealsTab = () => {
         const today = new Date().toISOString().split('T')[0];
         const todayChecks = (mealChecks && mealChecks[today]) || {};
+        
+        // Auto-reset meal checks if today is not in mealChecks yet
+        useEffect(() => {
+          if (mealChecks && !mealChecks[today]) {
+            // Today's checks don't exist yet, create empty entry
+            const newChecks = {
+              ...mealChecks,
+              [today]: {}
+            };
+            // Also clean up old entries (keep only last 7 days)
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+            const cutoffDate = sevenDaysAgo.toISOString().split('T')[0];
+            
+            Object.keys(newChecks).forEach(date => {
+              if (date < cutoffDate) {
+                delete newChecks[date];
+              }
+            });
+            
+            saveData('mealChecks', newChecks, setMealChecks);
+          }
+        }, [today]);
         
         const [editingItem, setEditingItem] = useState(null);
         const [searchQuery, setSearchQuery] = useState('');
