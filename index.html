@@ -643,24 +643,21 @@
           );
         };
 
-        const getLastAttempt = (dayName, exerciseName) => {
+        const getLastAttempt = (dayName, exerciseIndex) => {
           try {
             const today = new Date().toISOString().split('T')[0];
             const pastWorkouts = Object.entries(workoutHistory || {})
               .filter(([key]) => key.includes(`-${dayName}`) && !key.startsWith(today))
               .sort((a, b) => b[0].localeCompare(a[0]));
             
-            if (pastWorkouts.length === 0) return null;
-            
-            const mostRecent = pastWorkouts[0][1];
-            if (!mostRecent.exercises) return null;
-            
-            // Find exercise data by index matching
-            for (let idx in mostRecent.exercises) {
-              const exData = mostRecent.exercises[idx];
-              if (typeof exData === 'object' && Object.keys(exData).length > 0) {
+            // Look through past workouts (most recent first) for one where
+            // THIS specific exercise index actually has logged data
+            for (const [, pastWorkout] of pastWorkouts) {
+              if (!pastWorkout.exercises) continue;
+              const exData = pastWorkout.exercises[exerciseIndex];
+              if (exData && typeof exData === 'object' && Object.keys(exData).length > 0) {
                 return {
-                  date: mostRecent.date,
+                  date: pastWorkout.date,
                   data: exData
                 };
               }
@@ -769,7 +766,7 @@
 
                     {/* Last Attempt Tracker */}
                     {exercise.type !== 'recovery' && exercise.type !== 'cardio' && (() => {
-                      const lastAttempt = getLastAttempt(currentDay, exercise.name);
+                      const lastAttempt = getLastAttempt(currentDay, exerciseIndex);
                       return lastAttempt ? (
                         <div className="bg-slate-900 rounded p-3 mb-3 border-l-2 border-amber-600">
                           <div className="text-xs text-amber-400 font-bold mb-1">
